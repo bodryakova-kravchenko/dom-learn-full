@@ -37,6 +37,9 @@ $DB_NAME = $env['DB_NAME'] ?? '';
 $DB_USER = $env['DB_USER'] ?? '';
 $DB_PASSWORD = $env['DB_PASSWORD'] ?? '';
 $DB_CHARSET = $env['DB_CHARSET'] ?? 'utf8mb4';
+// Админские креды теперь из .env
+$ADMIN_LOGIN = $env['ADMIN_LOGIN'] ?? 'bodryakov.web';
+$ADMIN_PASSWORD = $env['ADMIN_PASSWORD'] ?? 'Anna-140275';
 
 /** @var PDO $pdo */
 $pdo = null;
@@ -163,6 +166,10 @@ if ($action !== '') {
             admin_logout();
             json_response(['ok'=>true]);
             exit;
+        case 'session_ok':
+            // Проверка активной сессии
+            if (is_admin_authenticated()) { json_response(['ok'=>true]); } else { http_response_code(401); json_response(['ok'=>false]); }
+            exit;
         default:
             http_response_code(400);
             header('Content-Type: application/json');
@@ -266,8 +273,9 @@ function is_admin_authenticated(): bool {
 }
 
 function admin_login(string $login, string $password): bool {
-    // Вшитые данные по ТЗ
-    $ok = ($login === 'bodryakov.web' && $password === 'Anna-140275');
+    // Данные из .env
+    global $ADMIN_LOGIN, $ADMIN_PASSWORD;
+    $ok = ($login === $ADMIN_LOGIN && $password === $ADMIN_PASSWORD);
     if ($ok) {
         $_SESSION['admin_ok'] = true;
     }
@@ -315,21 +323,19 @@ function admin_js_bundle(): string {
     var btn = h('button', {text: 'Войти'}); btn.type='submit';
     var msg = h('div', {class: 'admin-msg'});
 
-    // Автовход, если в localStorage есть флаг (минималистично по ТЗ)
-    try{ if(localStorage.getItem(LS_REMEMBER)==='1'){ // просто переходим к панели
-        mountPanel(); return; } }catch(e){}
+    // Если есть сессионная авторизация — сразу в панель
+    fetch('/crud.php?action=session_ok').then(function(r){ if(r.ok) return r.json(); throw 0; }).then(function(){ mountPanel(); }).catch(function(){
+      // Если включён флаг remember — после логина не разлогинивать на перезагрузках
+    });
 
     f.addEventListener('submit', function(ev){
       ev.preventDefault();
       var l = login.value.trim();
       var p = pass.value;
-      var ok = (l==='bodryakov.web' && p==='Anna-140275');
-      if(!ok){ msg.textContent='Неверный логин или пароль'; return; }
-      // помечаем в localStorage по запросу, сессия сервера создастся на первом серверном действии
-      try{ if(remember.checked){ localStorage.setItem(LS_REMEMBER,'1'); } }catch(e){}
-      // создадим серверную сессию вызовом ping (опционально)
       fetch('/crud.php?action=ping_login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({l:l,p:p})})
-        .finally(function(){ mountPanel(); });
+        .then(function(r){ if(!r.ok) throw new Error('Неверный логин или пароль'); return r.json(); })
+        .then(function(){ try{ if(remember.checked){ localStorage.setItem(LS_REMEMBER,'1'); } }catch(e){}; mountPanel(); })
+        .catch(function(e){ msg.textContent = (e && e.message) ? e.message : 'Ошибка авторизации'; });
     });
 
     wrap.appendChild(title);
