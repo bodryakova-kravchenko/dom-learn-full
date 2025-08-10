@@ -35,14 +35,13 @@ if ($uri === '/') {
     $levels = db_get_levels();
     render_header('Уровни');
     echo '<main class="container">';
-    echo '<h1>Уровни</h1>';
+    echo '';
     // Каждый уровень — на всю ширину, внутри — карточки разделов и уроков
     foreach ($levels as $lv) {
         $levelPath = '/' . ((int)$lv['number']) . '-' . e($lv['slug']);
         echo '<section class="level-card card">';
         echo '  <header class="level-header">';
-        echo '    <h2 class="level-title"><a href="' . $levelPath . '">' . e($lv['title_ru']) . '</a></h2>';
-        echo '    <span class="muted">Уровень ' . (int)$lv['number'] . '</span>';
+        echo '    <h2 class="level-title"><a href="' . $levelPath . '">Уровень ' . (int)$lv['number'] . ' - ' . e($lv['title_ru']) . '</a></h2>';
         echo '  </header>';
 
         // Секции уровня
