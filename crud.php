@@ -531,26 +531,32 @@ function admin_js_bundle(): string {
     // CKEditor 5 (локально из каталога /ckeditor)
     var ckeEditor = null;
     function loadScript(src, cb){ var s=document.createElement('script'); s.src=src; s.onload=cb; s.onerror=function(){ cb(new Error('Fail '+src)); }; document.head.appendChild(s); }
+    function getClassicCtor(){ return (window.ClassicEditor) || (window.CKEDITOR && window.CKEDITOR.ClassicEditor) || null; }
     function ensureCKE(cb){
-      if (window.ClassicEditor) return cb();
+      if (getClassicCtor()) return cb();
       // Пробуем стандартные пути распаковки
-      loadScript('/ckeditor/ckeditor5/ckeditor5.js', function(errX){
-        if (!errX && window.ClassicEditor) return cb();
-        loadScript('/ckeditor/ckeditor5/ckeditor.js', function(err0){
-          if (!err0 && window.ClassicEditor) return cb();
-          loadScript('/ckeditor/ckeditor.js', function(err){
-            if (!err && window.ClassicEditor) return cb();
-            loadScript('/ckeditor/build/ckeditor.js', function(err2){
-              if (!err2 && window.ClassicEditor) return cb();
-              // Относительные пути (если каталог ckeditor рядом с корнем приложения)
-              loadScript('ckeditor/ckeditor5/ckeditor5.js', function(errXr){
-                if (!errXr && window.ClassicEditor) return cb();
-                loadScript('ckeditor/ckeditor5/ckeditor.js', function(err3){
-                  if (!err3 && window.ClassicEditor) return cb();
-                  loadScript('ckeditor/build/ckeditor.js', function(err4){
-                    // Если сюда дошли — вероятно ESM-сборка без window.ClassicEditor
-                    if (!window.ClassicEditor) console.warn('CKEditor: не найден глобальный ClassicEditor. Используйте UMD Classic build (ckeditor/build/ckeditor.js) или укажите корректный путь.');
-                    cb();
+      loadScript('/ckeditor/ckeditor5/ckeditor5.umd.js', function(errU){
+        if (!errU && getClassicCtor()) return cb();
+        loadScript('/ckeditor/ckeditor5/ckeditor5.js', function(errX){
+          if (!errX && getClassicCtor()) return cb();
+          loadScript('/ckeditor/ckeditor5/ckeditor.js', function(err0){
+            if (!err0 && getClassicCtor()) return cb();
+            loadScript('/ckeditor/ckeditor.js', function(err){
+              if (!err && getClassicCtor()) return cb();
+              loadScript('/ckeditor/build/ckeditor.js', function(err2){
+                if (!err2 && getClassicCtor()) return cb();
+                // Относительные пути (если каталог ckeditor рядом с корнем приложения)
+                loadScript('ckeditor/ckeditor5/ckeditor5.umd.js', function(errUr){
+                  if (!errUr && getClassicCtor()) return cb();
+                  loadScript('ckeditor/ckeditor5/ckeditor5.js', function(errXr){
+                    if (!errXr && getClassicCtor()) return cb();
+                    loadScript('ckeditor/ckeditor5/ckeditor.js', function(err3){
+                      if (!err3 && getClassicCtor()) return cb();
+                      loadScript('ckeditor/build/ckeditor.js', function(err4){
+                        if (!getClassicCtor()) console.warn('CKEditor: не найден глобальный ClassicEditor. Используйте UMD Classic build (ckeditor/build/ckeditor.js) или укажите корректный путь.');
+                        cb();
+                      });
+                    });
                   });
                 });
               });
@@ -577,8 +583,9 @@ function admin_js_bundle(): string {
     UploadAdapter.prototype.abort = function(){};
 
     ensureCKE(function(){
-      if (!window.ClassicEditor) return;
-      ClassicEditor.create(taTheory, {})
+      var Ctor = getClassicCtor();
+      if (!Ctor) return;
+      Ctor.create(taTheory, {})
         .then(function(ed){
           ckeEditor = ed;
           // Кастомный адаптер загрузки
