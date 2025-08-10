@@ -217,28 +217,6 @@ if (count($parts) >= 1 && preg_match('~^(\d+)-([a-z-]+)$~', $parts[0], $m1)) {
             echo '</article>';
             echo '</main>';
 
-            // JS для мгновенной проверки тестов (без смены ответа)
-            echo '<script>\n';
-            echo '(function(){\n';
-            echo '  document.querySelectorAll(".test-question").forEach(function(qEl){\n';
-            echo '    var correct = parseInt(qEl.dataset.correct||"-1",10);\n';
-            echo '    var answered = false;\n';
-            echo '    qEl.querySelectorAll(".answer").forEach(function(btn){\n';
-            echo '      btn.addEventListener("click", function(){\n';
-            echo '        if(answered) return;\n';
-            echo '        answered = true;\n';
-            echo '        var idx = parseInt(btn.dataset.idx,10);\n';
-            echo '        qEl.querySelectorAll(".answer").forEach(function(b,i){\n';
-            echo '          if(i===correct){ b.classList.add("correct"); b.textContent = "✔ " + b.textContent; }\n';
-            echo '          if(i===idx && i!==correct){ b.classList.add("wrong"); b.textContent = "✘ " + b.textContent; }\n';
-            echo '          b.disabled = true;\n';
-            echo '        });\n';
-            echo '      });\n';
-            echo '    });\n';
-            echo '  });\n';
-            echo '})();\n';
-            echo '</script>';
-
             render_footer();
             exit;
         }
@@ -256,6 +234,7 @@ function render_header(string $title, bool $with_topbar = true): void {
     echo '<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">';
     echo '<title>' . e($title) . ' — DOMLearn</title>';
     echo '<link rel="stylesheet" href="/style.css">';
+    echo '<script src="/app.js?v=' . filemtime(__DIR__ . '/app.js') . '" defer></script>';
     echo '</head><body class="theme-light">';
     if ($with_topbar) {
         echo '<header class="topbar">';
@@ -265,20 +244,6 @@ function render_header(string $title, bool $with_topbar = true): void {
         echo '<button id="themeToggle" class="icon-btn" title="Переключить тему">🌓</button>';
         echo '</div>';
         echo '</header>';
-        echo '<script>\n';
-        echo '(function(){\n';
-        echo '  var key = "domlearn-theme";\n';
-        echo '  var saved = localStorage.getItem(key);\n';
-        echo '  if(saved){ document.body.className = saved; }\n';
-        echo '  document.getElementById("themeToggle").addEventListener("click", function(){\n';
-        echo '    var cur = document.body.classList.contains("theme-dark") ? "theme-dark" : "theme-light";\n';
-        echo '    var next = cur === "theme-dark" ? "theme-light" : "theme-dark";\n';
-        echo '    document.body.classList.remove("theme-dark","theme-light");\n';
-        echo '    document.body.classList.add(next);\n';
-        echo '    localStorage.setItem(key, next);\n';
-        echo '  });\n';
-        echo '})();\n';
-        echo '</script>';
     }
 }
 
