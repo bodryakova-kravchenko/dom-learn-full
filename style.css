@@ -68,6 +68,41 @@ h1,h2,h3{ line-height:1.25; margin: 1rem 0 .5rem; }
 .card h2 a, .card h3 a{ color:var(--fg); text-decoration:none; }
 .card h2 a:hover, .card h3 a:hover{ color:var(--primary); }
 
+/* ===== Главная: уровни -> разделы -> уроки ===== */
+.level-card{
+  margin: 16px 0;
+  padding: 20px;
+}
+.level-header{
+  display:grid; grid-template-columns: 1fr auto; align-items: baseline; gap:10px;
+  margin-bottom: 14px;
+  border-bottom:1px dashed var(--border);
+  padding-bottom:10px;
+}
+.level-title{ margin:0; }
+
+.section-list{
+  display:grid; gap:14px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.section-card{
+  padding:16px;
+}
+.section-card .section-title{ margin:0 0 6px; }
+.badge{ display:inline-block; font-size:12px; padding:2px 8px; border:1px solid var(--border); border-radius:999px; }
+
+.lesson-list{
+  margin-top:10px;
+  display:grid; gap:8px;
+}
+.lesson-card{
+  border:1px solid var(--border); border-radius:10px; background: var(--bg);
+  transition: transform .1s ease, box-shadow .1s ease, border-color .1s ease;
+}
+.lesson-card:hover{ transform: translateY(-1px); box-shadow: var(--shadow); border-color: var(--primary); }
+.lesson-link{ display:block; padding:10px 12px; color:var(--fg); text-decoration:none; }
+.lesson-link:hover{ color: var(--primary); }
+.lesson-link .order{ color: var(--muted); margin-right:6px; }
+
 .breadcrumbs{ padding:14px 0; color:var(--muted); }
 .breadcrumbs .crumb{ color:var(--muted); text-decoration:none; }
 .breadcrumbs .crumb:hover{ color:var(--primary); }
@@ -151,6 +186,7 @@ h1,h2,h3{ line-height:1.25; margin: 1rem 0 .5rem; }
 @media (max-width: 720px){
   .grid.cards{ grid-template-columns: 1fr; }
   .lesson-nav{ grid-auto-flow: row; }
+  .section-list{ grid-template-columns: 1fr; }
 }
 
 /* ============================

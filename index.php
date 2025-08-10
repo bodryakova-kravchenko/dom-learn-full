@@ -36,15 +36,45 @@ if ($uri === '/') {
     render_header('Уровни');
     echo '<main class="container">';
     echo '<h1>Уровни</h1>';
-    echo '<div class="grid cards">';
+    // Каждый уровень — на всю ширину, внутри — карточки разделов и уроков
     foreach ($levels as $lv) {
-        $path = '/' . ((int)$lv['number']) . '-' . e($lv['slug']);
-        echo '<article class="card">';
-        echo '<h2><a href="' . $path . '">' . e($lv['title_ru']) . '</a></h2>';
-        echo '<p class="muted">Уровень ' . (int)$lv['number'] . '</p>';
-        echo '</article>';
+        $levelPath = '/' . ((int)$lv['number']) . '-' . e($lv['slug']);
+        echo '<section class="level-card card">';
+        echo '  <header class="level-header">';
+        echo '    <h2 class="level-title"><a href="' . $levelPath . '">' . e($lv['title_ru']) . '</a></h2>';
+        echo '    <span class="muted">Уровень ' . (int)$lv['number'] . '</span>';
+        echo '  </header>';
+
+        // Секции уровня
+        $sections = db_get_sections_by_level_id((int)$lv['id']);
+        if (!empty($sections)) {
+            echo '  <div class="section-list">';
+            foreach ($sections as $sec) {
+                $sectionPath = $levelPath . '/' . ((int)$sec['section_order']) . '-' . e($sec['slug']);
+                echo '    <article class="section-card card">';
+                echo '      <h3 class="section-title"><a href="' . $sectionPath . '">' . e($sec['title_ru']) . '</a></h3>';
+                echo '      <span class="badge muted">Раздел ' . (int)$sec['section_order'] . '</span>';
+
+                // Уроки раздела
+                $lessons = db_get_lessons_by_section_id((int)$sec['id']);
+                if (!empty($lessons)) {
+                    echo '      <div class="lesson-list">';
+                    foreach ($lessons as $lsn) {
+                        $lessonPath = $sectionPath . '/' . ((int)$lsn['lesson_order']) . '-' . e($lsn['slug']);
+                        echo '        <div class="lesson-card">';
+                        echo '          <a class="lesson-link" href="' . $lessonPath . '"><span class="order">' . (int)$lsn['lesson_order'] . '.</span> ' . e($lsn['title_ru']) . '</a>';
+                        echo '        </div>';
+                    }
+                    echo '      </div>';
+                }
+
+                echo '    </article>';
+            }
+            echo '  </div>';
+        }
+
+        echo '</section>';
     }
-    echo '</div>';
     echo '</main>';
     render_footer();
     exit;
