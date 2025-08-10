@@ -1,0 +1,18 @@
+# .htaccess — ЧПУ-роутинг на index.php и отдача статики
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Если файл или папка существуют — отдаём напрямую
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Иначе — всё на index.php
+  RewriteRule ^ index.php [L]
+</IfModule>
+
+# Разрешить большие загрузки, если нужно (на сервере уже 5 МБ+)
+# php_value upload_max_filesize 10M
+# php_value post_max_size 10M
