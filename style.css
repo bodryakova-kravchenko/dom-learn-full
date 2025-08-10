@@ -122,6 +122,26 @@ h1,h2,h3{ line-height:1.25; margin: 1rem 0 .5rem; }
 .answer.correct{ border-color: #16a34a; color:#166534; }
 .answer.wrong{ border-color:#dc2626; color:#7f1d1d; }
 
+/* Dark theme: make answers light for contrast */
+body.theme-dark .answer{
+  background: #e5e7eb;           /* light slate gray */
+  color: #0b1220;                /* dark text for readability */
+  border-color: #cbd5e1;         /* light border */
+}
+body.theme-dark .answer:hover{
+  background: #f1f5f9;           /* even lighter on hover */
+}
+body.theme-dark .answer.correct{
+  background: #ecfdf5;           /* light green background */
+  border-color: #34d399;         /* green border */
+  color: #065f46;                /* readable dark teal text */
+}
+body.theme-dark .answer.wrong{
+  background: #fef2f2;           /* light red background */
+  border-color: #fca5a5;         /* red border */
+  color: #7f1d1d;                /* readable dark red text */
+}
+
 .lesson-nav{ display:grid; grid-auto-flow: column; gap:12px; justify-content:start; }
 
 .footer{ margin-top:40px; padding:20px 0; border-top:1px solid var(--border); color:var(--muted); }
