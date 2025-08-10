@@ -122,24 +122,24 @@ h1,h2,h3{ line-height:1.25; margin: 1rem 0 .5rem; }
 .answer.correct{ border-color: #16a34a; color:#166534; }
 .answer.wrong{ border-color:#dc2626; color:#7f1d1d; }
 
-/* Dark theme: make answers light for contrast */
+/* Dark theme: answers use light text on dark background */
 body.theme-dark .answer{
-  background: #e5e7eb;           /* light slate gray */
-  color: #0b1220;                /* dark text for readability */
-  border-color: #cbd5e1;         /* light border */
+  background: #111827;           /* dark slate */
+  color: #e5e7eb;                /* light text */
+  border-color: #374151;         /* dark border */
 }
 body.theme-dark .answer:hover{
-  background: #f1f5f9;           /* even lighter on hover */
+  background: #1f2937;           /* slightly lighter on hover */
 }
 body.theme-dark .answer.correct{
-  background: #ecfdf5;           /* light green background */
-  border-color: #34d399;         /* green border */
-  color: #065f46;                /* readable dark teal text */
+  background: #064e3b;           /* dark green */
+  border-color: #10b981;         /* emerald border */
+  color: #d1fae5;                /* mint text */
 }
 body.theme-dark .answer.wrong{
-  background: #fef2f2;           /* light red background */
-  border-color: #fca5a5;         /* red border */
-  color: #7f1d1d;                /* readable dark red text */
+  background: #7f1d1d;           /* dark red */
+  border-color: #f87171;         /* light red border */
+  color: #fee2e2;                /* light pink text */
 }
 
 .lesson-nav{ display:grid; grid-auto-flow: column; gap:12px; justify-content:start; }
