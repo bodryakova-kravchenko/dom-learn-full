@@ -92,9 +92,17 @@ h1,h2,h3{ line-height:1.25; margin: 1rem 0 .5rem; }
 .footer{ margin-top:40px; padding:20px 0; border-top:1px solid var(--border); color:var(--muted); }
 
 /* Админка */
+.admin{ margin-top: 5vh; }
 .admin .admin-bar{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:12px; }
+.admin .admin-bar button{ justify-self: end; max-width: 220px; }
 .admin .admin-login{ display:grid; gap:12px; max-width:420px; margin-top:12px; }
 .admin .admin-login form{ display:grid; gap:10px; }
+.admin .admin-login input[type="text"],
+.admin .admin-login input[type="password"],
+.admin .admin-login button{
+  font-size: 2rem;          /* в 2 раза больше текущего */
+  width: 80%;               /* немного меньше по ширине */
+}
 .admin .admin-msg{ color:#dc2626; }
 
 /* Admin shell */

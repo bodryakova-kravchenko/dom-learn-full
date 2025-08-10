@@ -356,11 +356,14 @@ function admin_js_bundle(): string {
     var root = document.getElementById('adminApp');
     root.innerHTML = '';
     var bar = h('div', {class:'admin-bar'});
+    // Кнопка перехода на сайт (слева)
+    var visit = h('a', {text:'Перейти на сайт'}); visit.href = '/'; visit.className = 'btn';
     var logout = h('button', {text:'Выйти'});
     logout.addEventListener('click', function(){
       try{ localStorage.removeItem(LS_REMEMBER); }catch(e){}
       fetch('/crud.php?action=logout', {method:'POST'}).finally(mountLogin);
     });
+    bar.appendChild(visit);
     bar.appendChild(logout);
 
     var shell = el('div','admin-shell');
