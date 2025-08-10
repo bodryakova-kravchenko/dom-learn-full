@@ -145,7 +145,8 @@ if (count($parts) >= 1 && preg_match('~^(\d+)-([a-z-]+)$~', $parts[0], $m1)) {
                 foreach ($tests as $qi => $q) {
                     $qid = 'q' . ($qi+1);
                     echo '<div class="test-question" data-correct="' . (int)($q['correctIndex'] ?? -1) . '">';
-                    echo '<h3>' . e($q['question'] ?? '') . '</h3>';
+                    $qh = $q['question_html'] ?? '';
+                    echo '<h3>' . ($qh !== '' ? $qh : e($q['question'] ?? '')) . '</h3>';
                     echo '<ul class="answers">';
                     foreach (($q['answers'] ?? []) as $ai => $ans) {
                         echo '<li><button type="button" class="answer" data-idx="' . $ai . '">' . e($ans) . '</button></li>';

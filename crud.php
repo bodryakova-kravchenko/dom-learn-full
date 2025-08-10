@@ -594,7 +594,220 @@ function admin_js_bundle(): string {
         .catch(function(e){ console.warn('CKE init error', e); });
     });
 
+    // --- Конструктор тестов и задач (гибрид) ---
+    var testsBuilderWrap = document.createElement('div'); testsBuilderWrap.className = 'builder tests-builder';
+    var tasksBuilderWrap = document.createElement('div'); tasksBuilderWrap.className = 'builder tasks-builder';
+
+    // Кнопки переключения между textarea и конструктором
+    var toggles = document.createElement('div'); toggles.className = 'row';
+    var btnTestsBuilder = document.createElement('button'); btnTestsBuilder.type='button'; btnTestsBuilder.textContent='🧩 Конструктор тестов';
+    var btnTasksBuilder = document.createElement('button'); btnTasksBuilder.type='button'; btnTasksBuilder.textContent='🧩 Конструктор задач';
+    toggles.appendChild(btnTestsBuilder); toggles.appendChild(btnTasksBuilder); f.insertBefore(toggles, row);
+
+    // Стили минимальные (встраиваемые)
+    var style = document.createElement('style'); style.textContent = `
+      .builder{ margin: 12px 0; padding: 10px; border:1px dashed #bbb; border-radius:8px;}
+      .builder h4{ margin: 6px 0 10px; }
+      .builder .item{ border:1px solid #ddd; padding:10px; border-radius:8px; margin-bottom:10px; }
+      .builder .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+      .builder input[type="text"]{ width:100%; padding:6px; }
+      .answers-list{ display:grid; gap:6px; }
+      .answers-list .answer-row{ display:flex; gap:6px; align-items:center; }
+      .answers-list .answer-row input[type="text"]{ flex:1; }
+      .builder .btn-small{ font-size:12px; padding:4px 8px; }
+    `; document.head.appendChild(style);
+
+    // Хранилища инстансов редакторов для динамических элементов
+    var testsEditors = []; // [{qid, editor}]
+    var tasksEditors = []; // [{tid, editor}]
+
+    function destroyEditors(arr){
+      (arr||[]).forEach(function(rec){ if(rec && rec.editor){ try{ rec.editor.destroy(); }catch(e){} } });
+      arr.length = 0;
+    }
+
+    function uid(){ return Math.random().toString(36).slice(2,9); }
+
+    // --- Конструктор тестов ---
+    function buildTestsUI(){
+      testsBuilderWrap.innerHTML = '';
+      var h = document.createElement('h4'); h.textContent = 'Тестовые вопросы'; testsBuilderWrap.appendChild(h);
+      var list = document.createElement('div'); testsBuilderWrap.appendChild(list);
+      var addBtn = document.createElement('button'); addBtn.type='button'; addBtn.className='btn-small'; addBtn.textContent='+ Добавить вопрос'; testsBuilderWrap.appendChild(addBtn);
+
+      function addQuestion(q){
+        var qid = uid();
+        var item = document.createElement('div'); item.className='item'; item.dataset.qid = qid;
+        // Заголовок вопроса (rich)
+        var qLabel = document.createElement('div'); qLabel.textContent = 'Текст вопроса:'; item.appendChild(qLabel);
+        var qArea = document.createElement('div'); qArea.setAttribute('contenteditable','true'); qArea.style.minHeight='80px'; qArea.style.border='1px solid #ccc'; qArea.style.padding='6px'; item.appendChild(qArea);
+        // Ответы
+        var answersWrap = document.createElement('div'); answersWrap.className='answers-list'; item.appendChild(answersWrap);
+        var ansLabel = document.createElement('div'); ansLabel.textContent='Ответы (выберите правильный):'; item.insertBefore(ansLabel, answersWrap);
+
+        function addAnswerRow(val, idx, correctIdx){
+          var row = document.createElement('div'); row.className='answer-row';
+          var rb = document.createElement('input'); rb.type='radio'; rb.name='correct-'+qid; rb.value=String(idx);
+          if (typeof correctIdx==='number' && correctIdx===idx) rb.checked = true;
+          var inp = document.createElement('input'); inp.type='text'; inp.placeholder='Ответ'; inp.value = val||'';
+          var del = document.createElement('button'); del.type='button'; del.className='btn-small'; del.textContent='Удалить';
+          del.addEventListener('click', function(){ row.remove(); renumberAnswers(); });
+          row.appendChild(rb); row.appendChild(inp); row.appendChild(del); answersWrap.appendChild(row);
+        }
+
+        function renumberAnswers(){
+          // Обновлять name не требуется, только индексы в value радио при синхронизации пересчитаем
+        }
+
+        var addAnsBtn = document.createElement('button'); addAnsBtn.type='button'; addAnsBtn.className='btn-small'; addAnsBtn.textContent='+ Ответ';
+        addAnsBtn.addEventListener('click', function(){ addAnswerRow('', answersWrap.children.length, null); });
+        item.appendChild(addAnsBtn);
+
+        // Кнопки управления вопросом
+        var tools = document.createElement('div'); tools.className='row';
+        var delQ = document.createElement('button'); delQ.type='button'; delQ.className='btn-small'; delQ.textContent='Удалить вопрос';
+        delQ.addEventListener('click', function(){
+          // удалить редактор
+          var recIdx = testsEditors.findIndex(function(r){ return r.qid===qid; });
+          if(recIdx>=0){ try{ testsEditors[recIdx].editor.destroy(); }catch(e){} testsEditors.splice(recIdx,1); }
+          item.remove();
+        });
+        tools.appendChild(delQ); item.appendChild(tools);
+
+        list.appendChild(item);
+
+        // Инициализируем редактор для вопроса (с учётом асинх. загрузки CKE)
+        var Ctor = getClassicCtor();
+        function initQ(){
+          var C = getClassicCtor();
+          if(!C){ console.warn('CKE not ready for tests'); return; }
+          C.create(qArea, {})
+            .then(function(ed){
+              testsEditors.push({qid: qid, editor: ed});
+              ed.plugins.get('FileRepository').createUploadAdapter = function(loader){ return new UploadAdapter(loader); };
+              if (q && q.question_html){ ed.setData(q.question_html); }
+              else if (q && q.question){ ed.setData(q.question); }
+            })
+            .catch(function(e){ console.warn('CKE tests init error', e); });
+        }
+        if (Ctor) initQ(); else ensureCKE(initQ);
+
+        // Предзаполним ответы
+        var answers = (q && Array.isArray(q.answers)) ? q.answers : ['',''];
+        var corr = (q && typeof q.correctIndex==='number') ? q.correctIndex : -1;
+        answers.forEach(function(a,i){ addAnswerRow(a, i, corr); });
+      }
+
+      addBtn.addEventListener('click', function(){ addQuestion({answers:['',''], correctIndex:-1}); });
+
+      // Заполняем из текущего JSON
+      var currentTests = [];
+      try { currentTests = JSON.parse(taTests.value||'[]'); } catch(e){ currentTests = []; }
+      (currentTests||[]).forEach(addQuestion);
+
+      return { list: list };
+    }
+
+    function testsToJSON(){
+      var arr = [];
+      testsBuilderWrap.querySelectorAll('.item').forEach(function(item){
+        var qid = item.dataset.qid;
+        var rec = testsEditors.find(function(r){ return r.qid===qid; });
+        var html = rec && rec.editor ? rec.editor.getData() : '';
+        var answers = [];
+        var correctIndex = -1;
+        var rows = item.querySelectorAll('.answers-list .answer-row');
+        rows.forEach(function(row, idx){
+          var inp = row.querySelector('input[type="text"]');
+          var rb = row.querySelector('input[type="radio"]');
+          answers.push((inp&&inp.value)||'');
+          if (rb && rb.checked) correctIndex = idx;
+        });
+        arr.push({ question_html: html, answers: answers, correctIndex: correctIndex });
+      });
+      return arr;
+    }
+
+    // --- Конструктор задач ---
+    function buildTasksUI(){
+      tasksBuilderWrap.innerHTML = '';
+      var h = document.createElement('h4'); h.textContent = 'Задачи'; tasksBuilderWrap.appendChild(h);
+      var list = document.createElement('div'); tasksBuilderWrap.appendChild(list);
+      var addBtn = document.createElement('button'); addBtn.type='button'; addBtn.className='btn-small'; addBtn.textContent='+ Добавить задачу'; tasksBuilderWrap.appendChild(addBtn);
+
+      function addTask(t){
+        var tid = uid();
+        var item = document.createElement('div'); item.className='item'; item.dataset.tid = tid;
+        var titleIn = document.createElement('input'); titleIn.type='text'; titleIn.placeholder='Заголовок'; titleIn.value = (t&&t.title)||''; item.appendChild(titleIn);
+        var bodyLabel = document.createElement('div'); bodyLabel.textContent='Текст задачи:'; item.appendChild(bodyLabel);
+        var body = document.createElement('div'); body.setAttribute('contenteditable','true'); body.style.minHeight='100px'; body.style.border='1px solid #ccc'; body.style.padding='6px'; item.appendChild(body);
+
+        var tools = document.createElement('div'); tools.className='row';
+        var delT = document.createElement('button'); delT.type='button'; delT.className='btn-small'; delT.textContent='Удалить задачу';
+        delT.addEventListener('click', function(){
+          var recIdx = tasksEditors.findIndex(function(r){ return r.tid===tid; });
+          if(recIdx>=0){ try{ tasksEditors[recIdx].editor.destroy(); }catch(e){} tasksEditors.splice(recIdx,1); }
+          item.remove();
+        });
+        tools.appendChild(delT); item.appendChild(tools);
+
+        list.appendChild(item);
+
+        var Ctor = getClassicCtor();
+        function initT(){
+          var C = getClassicCtor();
+          if(!C){ console.warn('CKE not ready for tasks'); return; }
+          C.create(body, {})
+            .then(function(ed){
+              tasksEditors.push({tid: tid, editor: ed, titleIn: titleIn});
+              ed.plugins.get('FileRepository').createUploadAdapter = function(loader){ return new UploadAdapter(loader); };
+              if (t && t.text_html){ ed.setData(t.text_html); }
+            })
+            .catch(function(e){ console.warn('CKE tasks init error', e); });
+        }
+        if (Ctor) initT(); else ensureCKE(initT);
+      }
+
+      addBtn.addEventListener('click', function(){ addTask({title:'', text_html:''}); });
+
+      var currentTasks = [];
+      try { currentTasks = JSON.parse(taTasks.value||'[]'); } catch(e){ currentTasks = []; }
+      (currentTasks||[]).forEach(addTask);
+
+      return { list: list };
+    }
+
+    function tasksToJSON(){
+      return Array.from(tasksBuilderWrap.querySelectorAll('.item')).map(function(item){
+        var tid = item.dataset.tid;
+        var rec = tasksEditors.find(function(r){ return r.tid===tid; });
+        return { title: rec && rec.titleIn ? rec.titleIn.value : '', text_html: rec && rec.editor ? rec.editor.getData() : '' };
+      });
+    }
+
+    // Обработчики кнопок включения конструкторов
+    btnTestsBuilder.addEventListener('click', function(){
+      // Скрыть textarea, показать конструктор
+      taTests.style.display='none';
+      if (!testsBuilderWrap.parentNode) f.insertBefore(testsBuilderWrap, row);
+      destroyEditors(testsEditors);
+      buildTestsUI();
+    });
+    btnTasksBuilder.addEventListener('click', function(){
+      taTasks.style.display='none';
+      if (!tasksBuilderWrap.parentNode) f.insertBefore(tasksBuilderWrap, row);
+      destroyEditors(tasksEditors);
+      buildTasksUI();
+    });
+
+    function syncBuildersToTextareas(){
+      if (testsBuilderWrap.parentNode){ taTests.value = JSON.stringify(testsToJSON(), null, 2); }
+      if (tasksBuilderWrap.parentNode){ taTasks.value = JSON.stringify(tasksToJSON(), null, 2); }
+    }
+
     function send(isPublished){
+      // Перед отправкой синхронизируем данные из конструкторов
+      syncBuildersToTextareas();
       var payload = {
         id: ls.id||null,
         section_id: ls.section_id,
