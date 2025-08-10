@@ -119,6 +119,55 @@ h1,h2,h3{ line-height:1.25; margin: 1rem 0 .5rem; }
 .answer{
   width:100%; text-align:left; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:var(--bg); cursor:pointer;
 }
+
+/* Wide screens: place questions in 2 columns */
+/* Notebooks: 1281–1600 */
+@media (min-width: 1281px) and (max-width: 1600px){
+  .tests{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .tests > h2{
+    grid-column: 1 / -1; /* title spans full width */
+    margin-bottom: 4px;
+  }
+  .tests .test-question{
+    height: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    background: var(--card);
+  }
+  .tests .test-question h3{
+    margin-top: 0;
+  }
+}
+/* Monitors: 1601–1920 */
+@media (min-width: 1601px) and (max-width: 1920px){
+  .tests{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+  .tests > h2{ grid-column: 1 / -1; margin-bottom: 4px; }
+  .tests .test-question{ height:100%; border:1px solid var(--border); border-radius:12px; padding:14px; background:var(--card); }
+  .tests .test-question h3{ margin-top:0; }
+}
+/* Large screens: 1921+ */
+@media (min-width: 1921px){
+  .tests{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr; /* 3 колонки на больших экранах */
+    gap: 20px;
+    align-items: start;
+  }
+  .tests > h2{ grid-column: 1 / -1; margin-bottom: 6px; }
+  .tests .test-question{ height:100%; border:1px solid var(--border); border-radius:14px; padding:16px; background:var(--card); }
+  .tests .test-question h3{ margin-top:0; }
+}
 .answer.correct{ border-color: #16a34a; color:#166534; }
 .answer.wrong{ border-color:#dc2626; color:#7f1d1d; }
 
@@ -197,16 +246,88 @@ body.theme-dark .answer.wrong{
 }
 .modal-close:hover{ color: var(--fg); background: var(--card); border-radius:6px; }
 
+/* ===========================
+   Адаптив по брейкпойнтам ТЗ
+   =========================== */
+/* Smartphones: <=720px */
 @media (max-width: 720px){
+  /* Admin layout simplifications */
   .admin .admin-shell{ grid-template-columns: 1fr; }
   .form .row{ grid-template-columns: auto 1fr; grid-auto-flow: row; }
-}
 
-/* Адаптив */
-@media (max-width: 720px){
+  /* Public UI adjustments */
   .grid.cards{ grid-template-columns: 1fr; }
   .lesson-nav{ grid-auto-flow: row; }
   .section-list{ grid-template-columns: 1fr; }
+
+  /* Tests spacing and touch targets */
+  .tests{ gap: 10px; }
+  .tests .answers{ gap: 10px; }
+  .tests .test-question{ padding: 10px; border-radius: 10px; }
+  .answer{ padding: 12px 14px; font-size: 16px; }
+
+  /* Cards and admin tweaks */
+  .card{ padding: 14px; }
+  .level-card{ padding: 14px; }
+  .section-card{ padding: 12px; }
+  .lesson-list{ gap: 10px; }
+  .section-list{ gap: 10px; }
+  .grid.cards{ gap: 12px; }
+  .modal-box{ padding: 12px; }
+  .admin .item{ padding: 8px 10px; }
+}
+
+/* Tablets: 721–1280px */
+@media (min-width: 721px) and (max-width: 1280px){
+  /* Tablet-specific spacing for tests */
+  .tests{ gap: 14px; }
+  .tests .test-question{ padding: 12px; border-radius: 12px; }
+
+  /* Cards and admin tweaks */
+  .card{ padding: 16px; }
+  .level-card{ padding: 16px; }
+  .section-card{ padding: 14px; }
+  .grid.cards{ gap: 14px; }
+  .section-list{ gap: 12px; }
+  .lesson-list{ gap: 10px; }
+  .modal-box{ padding: 14px; }
+  .admin .item{ padding: 10px 12px; }
+}
+
+/* Notebooks: 1281–1600px — правила выше для .tests */
+@media (min-width: 1281px) and (max-width: 1600px){
+  .card{ padding: 18px; }
+  .level-card{ padding: 18px; }
+  .section-card{ padding: 16px; }
+  .grid.cards{ gap: 16px; }
+  .section-list{ gap: 14px; }
+  .lesson-list{ gap: 10px; }
+  .modal-box{ padding: 16px; }
+  .admin .item{ padding: 11px 13px; }
+}
+
+/* Monitors: 1601–1920px — правила выше для .tests */
+@media (min-width: 1601px) and (max-width: 1920px){
+  .card{ padding: 20px; }
+  .level-card{ padding: 22px; }
+  .section-card{ padding: 18px; }
+  .grid.cards{ gap: 18px; }
+  .section-list{ gap: 16px; }
+  .lesson-list{ gap: 12px; }
+  .modal-box{ padding: 18px; }
+  .admin .item{ padding: 12px 14px; }
+}
+
+/* Large: 1921+ — правила выше для .tests */
+@media (min-width: 1921px){
+  .card{ padding: 24px; }
+  .level-card{ padding: 24px; }
+  .section-card{ padding: 20px; }
+  .grid.cards{ gap: 20px; }
+  .section-list{ gap: 18px; }
+  .lesson-list{ gap: 14px; }
+  .modal-box{ padding: 20px; }
+  .admin .item{ padding: 14px 16px; }
 }
 
 /* ============================
