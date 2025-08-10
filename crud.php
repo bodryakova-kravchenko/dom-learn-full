@@ -356,13 +356,12 @@ function admin_js_bundle(): string {
     var root = document.getElementById('adminApp');
     root.innerHTML = '';
     var bar = h('div', {class:'admin-bar'});
-    var title = h('h2', {text:'Панель управления'});
     var logout = h('button', {text:'Выйти'});
     logout.addEventListener('click', function(){
       try{ localStorage.removeItem(LS_REMEMBER); }catch(e){}
       fetch('/crud.php?action=logout', {method:'POST'}).finally(mountLogin);
     });
-    bar.appendChild(title); bar.appendChild(logout);
+    bar.appendChild(logout);
 
     var shell = el('div','admin-shell');
     var left = el('div','admin-left');
@@ -598,7 +597,22 @@ function admin_js_bundle(): string {
     ensureCKE(function(){
       var Ctor = getClassicCtor();
       if (!Ctor) return;
-      Ctor.create(taTheory, {})
+      Ctor.create(taTheory, {
+        toolbar: {
+          items: [
+            'heading',
+            '|',
+            'bold', 'italic', 'link',
+            '|',
+            'alignment:left', 'alignment:center', 'alignment:right', 'alignment:justify',
+            '|',
+            'imageUpload', 'blockQuote',
+            '|',
+            'undo', 'redo'
+          ]
+        },
+        removePlugins: [ 'MediaEmbed', 'List', 'Indent' ]
+      })
         .then(function(ed){
           ckeEditor = ed;
           // Кастомный адаптер загрузки
@@ -674,7 +688,22 @@ function admin_js_bundle(): string {
         function initQ(){
           var C = getClassicCtor();
           if(!C){ console.warn('CKE not ready for tests'); return; }
-          C.create(qArea, {})
+          C.create(qArea, {
+            toolbar: {
+              items: [
+                'heading',
+                '|',
+                'bold', 'italic', 'link',
+                '|',
+                'alignment:left', 'alignment:center', 'alignment:right', 'alignment:justify',
+                '|',
+                'imageUpload', 'blockQuote',
+                '|',
+                'undo', 'redo'
+              ]
+            },
+            removePlugins: [ 'MediaEmbed', 'List', 'Indent' ]
+          })
             .then(function(ed){
               testsEditors.push({qid: qid, editor: ed});
               ed.plugins.get('FileRepository').createUploadAdapter = function(loader){ return new UploadAdapter(loader); };
@@ -775,7 +804,22 @@ function admin_js_bundle(): string {
         function initT(){
           var C = getClassicCtor();
           if(!C){ console.warn('CKE not ready for tasks'); return; }
-          C.create(body, {})
+          C.create(body, {
+            toolbar: {
+              items: [
+                'heading',
+                '|',
+                'bold', 'italic', 'link',
+                '|',
+                'alignment:left', 'alignment:center', 'alignment:right', 'alignment:justify',
+                '|',
+                'imageUpload', 'blockQuote',
+                '|',
+                'undo', 'redo'
+              ]
+            },
+            removePlugins: [ 'MediaEmbed', 'List', 'Indent' ]
+          })
             .then(function(ed){
               tasksEditors.push({tid: tid, editor: ed, titleIn: titleIn});
               ed.plugins.get('FileRepository').createUploadAdapter = function(loader){ return new UploadAdapter(loader); };

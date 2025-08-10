@@ -222,33 +222,35 @@ exit;
 
 // ===== Вспомогательные функции рендера =====
 
-function render_header(string $title): void {
+function render_header(string $title, bool $with_topbar = true): void {
     echo '<!doctype html><html lang="ru"><head>';
     echo '<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">';
     echo '<title>' . e($title) . ' — DOMLearn</title>';
     echo '<link rel="stylesheet" href="/style.css">';
     echo '</head><body class="theme-light">';
-    echo '<header class="topbar">';
-    echo '<div class="container bar">';
-    echo '<a class="brand" href="/">DOMLearn</a>';
-    echo '<div class="spacer"></div>';
-    echo '<button id="themeToggle" class="icon-btn" title="Переключить тему">🌓</button>';
-    echo '</div>';
-    echo '</header>';
-    echo '<script>\n';
-    echo '(function(){\n';
-    echo '  var key = "domlearn-theme";\n';
-    echo '  var saved = localStorage.getItem(key);\n';
-    echo '  if(saved){ document.body.className = saved; }\n';
-    echo '  document.getElementById("themeToggle").addEventListener("click", function(){\n';
-    echo '    var cur = document.body.classList.contains("theme-dark") ? "theme-dark" : "theme-light";\n';
-    echo '    var next = cur === "theme-dark" ? "theme-light" : "theme-dark";\n';
-    echo '    document.body.classList.remove("theme-dark","theme-light");\n';
-    echo '    document.body.classList.add(next);\n';
-    echo '    localStorage.setItem(key, next);\n';
-    echo '  });\n';
-    echo '})();\n';
-    echo '</script>';
+    if ($with_topbar) {
+        echo '<header class="topbar">';
+        echo '<div class="container bar">';
+        echo '<a class="brand" href="/">DOMLearn</a>';
+        echo '<div class="spacer"></div>';
+        echo '<button id="themeToggle" class="icon-btn" title="Переключить тему">🌓</button>';
+        echo '</div>';
+        echo '</header>';
+        echo '<script>\n';
+        echo '(function(){\n';
+        echo '  var key = "domlearn-theme";\n';
+        echo '  var saved = localStorage.getItem(key);\n';
+        echo '  if(saved){ document.body.className = saved; }\n';
+        echo '  document.getElementById("themeToggle").addEventListener("click", function(){\n';
+        echo '    var cur = document.body.classList.contains("theme-dark") ? "theme-dark" : "theme-light";\n';
+        echo '    var next = cur === "theme-dark" ? "theme-light" : "theme-dark";\n';
+        echo '    document.body.classList.remove("theme-dark","theme-light");\n';
+        echo '    document.body.classList.add(next);\n';
+        echo '    localStorage.setItem(key, next);\n';
+        echo '  });\n';
+        echo '})();\n';
+        echo '</script>';
+    }
 }
 
 function render_footer(): void {
@@ -282,9 +284,9 @@ function render_404(): void {
 
 // ===== Рендер админки (HTML). JS загружается из crud.php?action=admin_js =====
 function render_admin_page(): void {
-    render_header('Админ-панель');
+    // Админка: без верхней панели и переключателя темы, всегда светлая тема
+    render_header('Админ-панель', false);
     echo '<main class="container admin">';
-    echo '<h1>Админ-панель</h1>';
     echo '<div id="adminApp"></div>';
     echo '<script src="/crud.php?action=admin_js"></script>';
     echo '</main>';
