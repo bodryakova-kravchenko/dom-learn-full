@@ -534,11 +534,28 @@ function admin_js_bundle(): string {
     function ensureCKE(cb){
       if (window.ClassicEditor) return cb();
       // Пробуем стандартные пути распаковки
-      loadScript('/ckeditor/ckeditor5/ckeditor.js', function(err0){
-        if (!err0 && window.ClassicEditor) return cb();
-        loadScript('/ckeditor/ckeditor.js', function(err){
-          if (!err && window.ClassicEditor) return cb();
-          loadScript('/ckeditor/build/ckeditor.js', function(err2){ cb(); });
+      loadScript('/ckeditor/ckeditor5/ckeditor5.js', function(errX){
+        if (!errX && window.ClassicEditor) return cb();
+        loadScript('/ckeditor/ckeditor5/ckeditor.js', function(err0){
+          if (!err0 && window.ClassicEditor) return cb();
+          loadScript('/ckeditor/ckeditor.js', function(err){
+            if (!err && window.ClassicEditor) return cb();
+            loadScript('/ckeditor/build/ckeditor.js', function(err2){
+              if (!err2 && window.ClassicEditor) return cb();
+              // Относительные пути (если каталог ckeditor рядом с корнем приложения)
+              loadScript('ckeditor/ckeditor5/ckeditor5.js', function(errXr){
+                if (!errXr && window.ClassicEditor) return cb();
+                loadScript('ckeditor/ckeditor5/ckeditor.js', function(err3){
+                  if (!err3 && window.ClassicEditor) return cb();
+                  loadScript('ckeditor/build/ckeditor.js', function(err4){
+                    // Если сюда дошли — вероятно ESM-сборка без window.ClassicEditor
+                    if (!window.ClassicEditor) console.warn('CKEditor: не найден глобальный ClassicEditor. Используйте UMD Classic build (ckeditor/build/ckeditor.js) или укажите корректный путь.');
+                    cb();
+                  });
+                });
+              });
+            });
+          });
         });
       });
     }
