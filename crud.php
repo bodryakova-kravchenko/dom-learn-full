@@ -598,24 +598,9 @@ function admin_js_bundle(): string {
     var testsBuilderWrap = document.createElement('div'); testsBuilderWrap.className = 'builder tests-builder';
     var tasksBuilderWrap = document.createElement('div'); tasksBuilderWrap.className = 'builder tasks-builder';
 
-    // Кнопки переключения между textarea и конструктором
-    var toggles = document.createElement('div'); toggles.className = 'row';
-    var btnTestsBuilder = document.createElement('button'); btnTestsBuilder.type='button'; btnTestsBuilder.textContent='🧩 Конструктор тестов';
-    var btnTasksBuilder = document.createElement('button'); btnTasksBuilder.type='button'; btnTasksBuilder.textContent='🧩 Конструктор задач';
-    toggles.appendChild(btnTestsBuilder); toggles.appendChild(btnTasksBuilder); f.insertBefore(toggles, row);
+    // Конструкторы будут показаны по умолчанию, без переключателей
 
-    // Стили минимальные (встраиваемые)
-    var style = document.createElement('style'); style.textContent = `
-      .builder{ margin: 12px 0; padding: 10px; border:1px dashed #bbb; border-radius:8px;}
-      .builder h4{ margin: 6px 0 10px; }
-      .builder .item{ border:1px solid #ddd; padding:10px; border-radius:8px; margin-bottom:10px; }
-      .builder .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-      .builder input[type="text"]{ width:100%; padding:6px; }
-      .answers-list{ display:grid; gap:6px; }
-      .answers-list .answer-row{ display:flex; gap:6px; align-items:center; }
-      .answers-list .answer-row input[type="text"]{ flex:1; }
-      .builder .btn-small{ font-size:12px; padding:4px 8px; }
-    `; document.head.appendChild(style);
+    // Стили перенесены в style.css
 
     // Хранилища инстансов редакторов для динамических элементов
     var testsEditors = []; // [{qid, editor}]
@@ -645,23 +630,18 @@ function admin_js_bundle(): string {
         var answersWrap = document.createElement('div'); answersWrap.className='answers-list'; item.appendChild(answersWrap);
         var ansLabel = document.createElement('div'); ansLabel.textContent='Ответы (выберите правильный):'; item.insertBefore(ansLabel, answersWrap);
 
+        // Добавление строки ответа (всегда формируем 4 строки, без удаления)
         function addAnswerRow(val, idx, correctIdx){
           var row = document.createElement('div'); row.className='answer-row';
           var rb = document.createElement('input'); rb.type='radio'; rb.name='correct-'+qid; rb.value=String(idx);
           if (typeof correctIdx==='number' && correctIdx===idx) rb.checked = true;
           var inp = document.createElement('input'); inp.type='text'; inp.placeholder='Ответ'; inp.value = val||'';
-          var del = document.createElement('button'); del.type='button'; del.className='btn-small'; del.textContent='Удалить';
-          del.addEventListener('click', function(){ row.remove(); renumberAnswers(); });
-          row.appendChild(rb); row.appendChild(inp); row.appendChild(del); answersWrap.appendChild(row);
+          row.appendChild(rb); row.appendChild(inp); answersWrap.appendChild(row);
         }
 
-        function renumberAnswers(){
-          // Обновлять name не требуется, только индексы в value радио при синхронизации пересчитаем
-        }
+        function renumberAnswers(){ /* индексация не требуется при фиксированных 4 вариантах */ }
 
-        var addAnsBtn = document.createElement('button'); addAnsBtn.type='button'; addAnsBtn.className='btn-small'; addAnsBtn.textContent='+ Ответ';
-        addAnsBtn.addEventListener('click', function(){ addAnswerRow('', answersWrap.children.length, null); });
-        item.appendChild(addAnsBtn);
+        // Кнопки добавления/удаления ответов убраны — всегда 4 варианта
 
         // Кнопки управления вопросом
         var tools = document.createElement('div'); tools.className='row';
@@ -692,8 +672,9 @@ function admin_js_bundle(): string {
         }
         if (Ctor) initQ(); else ensureCKE(initQ);
 
-        // Предзаполним ответы
-        var answers = (q && Array.isArray(q.answers)) ? q.answers : ['',''];
+        // Предзаполним ответы: всегда 4 варианта. Если меньше — дополним пустыми, если больше — обрежем до 4
+        var answers = (q && Array.isArray(q.answers)) ? q.answers.slice(0,4) : [];
+        while (answers.length < 4) answers.push('');
         var corr = (q && typeof q.correctIndex==='number') ? q.correctIndex : -1;
         answers.forEach(function(a,i){ addAnswerRow(a, i, corr); });
       }
@@ -726,6 +707,28 @@ function admin_js_bundle(): string {
         arr.push({ question_html: html, answers: answers, correctIndex: correctIndex });
       });
       return arr;
+    }
+
+    // Валидация конструкторов перед сохранением
+    // Требования: для каждого тестового вопроса всегда 4 варианта ответа и ровно один правильный
+    function validateBuilders(){
+      // Проверяем тесты только если конструктор отображается
+      if (testsBuilderWrap.parentNode){
+        var questions = testsBuilderWrap.querySelectorAll('.item');
+        for (var i=0;i<questions.length;i++){
+          var item = questions[i];
+          var rows = item.querySelectorAll('.answers-list .answer-row');
+          if (rows.length !== 4){
+            return 'В каждом вопросе должно быть ровно 4 варианта ответа.';
+          }
+          var checked = 0;
+          rows.forEach(function(row){ var rb=row.querySelector('input[type="radio"]'); if(rb && rb.checked) checked++; });
+          if (checked !== 1){
+            return 'В каждом вопросе должен быть выбран ровно один правильный ответ.';
+          }
+        }
+      }
+      return '';
     }
 
     // --- Конструктор задач ---
@@ -785,20 +788,16 @@ function admin_js_bundle(): string {
       });
     }
 
-    // Обработчики кнопок включения конструкторов
-    btnTestsBuilder.addEventListener('click', function(){
-      // Скрыть textarea, показать конструктор
-      taTests.style.display='none';
-      if (!testsBuilderWrap.parentNode) f.insertBefore(testsBuilderWrap, row);
-      destroyEditors(testsEditors);
-      buildTestsUI();
-    });
-    btnTasksBuilder.addEventListener('click', function(){
-      taTasks.style.display='none';
-      if (!tasksBuilderWrap.parentNode) f.insertBefore(tasksBuilderWrap, row);
-      destroyEditors(tasksEditors);
-      buildTasksUI();
-    });
+    // Включаем конструкторы по умолчанию
+    taTests.style.display='none';
+    if (!testsBuilderWrap.parentNode) f.insertBefore(testsBuilderWrap, row);
+    destroyEditors(testsEditors);
+    buildTestsUI();
+
+    taTasks.style.display='none';
+    if (!tasksBuilderWrap.parentNode) f.insertBefore(tasksBuilderWrap, row);
+    destroyEditors(tasksEditors);
+    buildTasksUI();
 
     function syncBuildersToTextareas(){
       if (testsBuilderWrap.parentNode){ taTests.value = JSON.stringify(testsToJSON(), null, 2); }
@@ -806,7 +805,9 @@ function admin_js_bundle(): string {
     }
 
     function send(isPublished){
-      // Перед отправкой синхронизируем данные из конструкторов
+      // Перед отправкой валидируем и синхронизируем данные из конструкторов
+      var err = validateBuilders();
+      if (err){ alert(err); return Promise.reject(new Error(err)); }
       syncBuildersToTextareas();
       var payload = {
         id: ls.id||null,
