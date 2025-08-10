@@ -512,14 +512,6 @@ function admin_js_bundle(): string {
     btnClose.title = 'Закрыть';
     btnClose.textContent = '✕';
     btnClose.className = 'modal-close';
-    // Минимальная позиционировка, если нет стилей
-    btnClose.style.position = 'absolute';
-    btnClose.style.top = '8px';
-    btnClose.style.right = '8px';
-    btnClose.style.background = 'transparent';
-    btnClose.style.border = 'none';
-    btnClose.style.fontSize = '18px';
-    btnClose.style.cursor = 'pointer';
     btnClose.addEventListener('click', function(ev){ ev.stopPropagation(); dlg.remove(); });
     box.appendChild(btnClose);
 
