@@ -530,6 +530,10 @@ function admin_js_bundle(): string {
     var btnPub = document.createElement('button'); btnPub.type='button'; btnPub.textContent='📢 Опубликовать';
     var status2 = document.createElement('span'); status2.className='status';
     row.appendChild(btnSave); row.appendChild(status1); row.appendChild(btnPub); row.appendChild(status2);
+    // Кнопка "Закрыть" справа от "Опубликовать"
+    var btnCloseForm = document.createElement('button'); btnCloseForm.type='button'; btnCloseForm.textContent='Закрыть';
+    btnCloseForm.addEventListener('click', function(){ dlg.remove(); });
+    row.appendChild(btnCloseForm);
     f.appendChild(row);
 
     box.appendChild(f);

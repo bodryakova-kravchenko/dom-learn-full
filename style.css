@@ -117,7 +117,7 @@ h1,h2,h3{ line-height:1.25; margin: 1rem 0 .5rem; }
 .form{ display:grid; gap:10px; }
 .form input[type="text"], .form input[type="password"], .form textarea{ width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--fg); }
 .form textarea{ min-height:120px; }
-.form .row{ display:grid; grid-template-columns: auto auto auto 1fr; align-items:center; gap:8px; margin-top:6px; }
+.form .row{ display:grid; grid-template-columns: auto auto auto 1fr auto; align-items:center; gap:8px; margin-top:6px; }
 .form .status{ color: #16a34a; }
 
 /* Modal close button */
