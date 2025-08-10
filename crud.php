@@ -505,6 +505,23 @@ function admin_js_bundle(): string {
     var dlg = document.createElement('div'); dlg.className='modal';
     var box = document.createElement('div'); box.className='modal-box'; dlg.appendChild(box);
     var title = document.createElement('h3'); title.textContent = (isNew?'Новый урок':'Редактировать урок'); box.appendChild(title);
+    // Кнопка закрытия (крестик)
+    var btnClose = document.createElement('button');
+    btnClose.type = 'button';
+    btnClose.setAttribute('aria-label','Закрыть');
+    btnClose.title = 'Закрыть';
+    btnClose.textContent = '✕';
+    btnClose.className = 'modal-close';
+    // Минимальная позиционировка, если нет стилей
+    btnClose.style.position = 'absolute';
+    btnClose.style.top = '8px';
+    btnClose.style.right = '8px';
+    btnClose.style.background = 'transparent';
+    btnClose.style.border = 'none';
+    btnClose.style.fontSize = '18px';
+    btnClose.style.cursor = 'pointer';
+    btnClose.addEventListener('click', function(ev){ ev.stopPropagation(); dlg.remove(); });
+    box.appendChild(btnClose);
 
     var f = document.createElement('form'); f.className='form';
     var inTitle = document.createElement('input'); inTitle.placeholder='Название (рус)'; inTitle.value = ls.title_ru||''; f.appendChild(inTitle);
@@ -741,7 +758,9 @@ function admin_js_bundle(): string {
       function addTask(t){
         var tid = uid();
         var item = document.createElement('div'); item.className='item'; item.dataset.tid = tid;
-        var titleIn = document.createElement('input'); titleIn.type='text'; titleIn.placeholder='Заголовок'; titleIn.value = (t&&t.title)||''; item.appendChild(titleIn);
+        var titleIn = document.createElement('input'); titleIn.type='text'; titleIn.placeholder='Заголовок'; titleIn.value = (t&&t.title)||'';
+        var titleLabel = document.createElement('label'); titleLabel.textContent='Заголовок задачи: ';
+        titleLabel.appendChild(titleIn); item.appendChild(titleLabel);
         var bodyLabel = document.createElement('div'); bodyLabel.textContent='Текст задачи:'; item.appendChild(bodyLabel);
         var body = document.createElement('div'); body.setAttribute('contenteditable','true'); body.style.minHeight='100px'; body.style.border='1px solid #ccc'; body.style.padding='6px'; item.appendChild(body);
 
