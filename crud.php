@@ -125,7 +125,12 @@ $action = $_GET['action'] ?? '';
 if ($action !== '') {
     switch ($action) {
         case 'admin_js':
+            // Явно отключаем кэширование, чтобы браузер всегда получал актуальную сборку админского JS
             header('Content-Type: application/javascript; charset=utf-8');
+            header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+            header('Cache-Control: post-check=0, pre-check=0', false);
+            header('Pragma: no-cache');
+            header('Expires: 0');
             echo admin_js_bundle();
             exit;
         case 'upload_image':
@@ -608,9 +613,10 @@ function admin_js_bundle(): string {
           'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
           'AIAssistant',
           'MultiLevelList','MultiLevelListUI','MultiLevelListEditing',
-          'PasteFromOfficeEnhanced','PasteFromOfficeEnhancedUI','PasteFromOfficeEnhancedEditing',
+          'PasteFromOfficeEnhanced','PasteFromOfficeEnhancedUI','PasteFromOfficeEnhancedEditing','PasteFromOfficeEnhancedPropagator',
           'CaseChange','CaseChangeUI','CaseChangeEditing'
-        ]
+        ],
+        licenseKey: 'GPL'
       })
         .then(function(ed){
           ckeEditor = ed;
@@ -711,9 +717,10 @@ function admin_js_bundle(): string {
               'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
               'AIAssistant',
               'MultiLevelList','MultiLevelListUI','MultiLevelListEditing',
-              'PasteFromOfficeEnhanced','PasteFromOfficeEnhancedUI','PasteFromOfficeEnhancedEditing',
+              'PasteFromOfficeEnhanced','PasteFromOfficeEnhancedUI','PasteFromOfficeEnhancedEditing','PasteFromOfficeEnhancedPropagator',
               'CaseChange','CaseChangeUI','CaseChangeEditing'
-            ]
+            ],
+            licenseKey: 'GPL'
           })
             .then(function(ed){
               testsEditors.push({qid: qid, editor: ed});
@@ -839,9 +846,10 @@ function admin_js_bundle(): string {
               'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
               'AIAssistant',
               'MultiLevelList','MultiLevelListUI','MultiLevelListEditing',
-              'PasteFromOfficeEnhanced','PasteFromOfficeEnhancedUI','PasteFromOfficeEnhancedEditing',
+              'PasteFromOfficeEnhanced','PasteFromOfficeEnhancedUI','PasteFromOfficeEnhancedEditing','PasteFromOfficeEnhancedPropagator',
               'CaseChange','CaseChangeUI','CaseChangeEditing'
-            ]
+            ],
+            licenseKey: 'GPL'
           })
             .then(function(ed){
               tasksEditors.push({tid: tid, editor: ed, titleIn: titleIn});
