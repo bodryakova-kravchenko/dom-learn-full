@@ -917,7 +917,8 @@ function admin_js_bundle(): string {
         .catch(function(e){ if(e && e.message==='Неверный slug') return; alert('Ошибка: '+e.message); });
     });
 
-    dlg.addEventListener('click', function(e){ if(e.target===dlg) dlg.remove(); });
+    // Отключаем закрытие по клику вне окна: модалка закрывается только кнопкой/крестиком
+    dlg.addEventListener('click', function(e){ /* backdrop click disabled */ });
   }
 
   // Инициализация
