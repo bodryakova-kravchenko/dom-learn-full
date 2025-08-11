@@ -151,6 +151,9 @@ if (count($parts) >= 1 && preg_match('~^(\d+)-([a-z-]+)$~', $parts[0], $m1)) {
                 echo '</article>';
             }
             echo '</div>';
+            echo '<nav class="lesson-nav">';
+            echo '<a class="btn" href="/">На главную</a>';
+            echo '</nav>';
             echo '</main>';
             render_footer();
             exit;
