@@ -356,15 +356,20 @@ function admin_js_bundle(): string {
     var root = document.getElementById('adminApp');
     root.innerHTML = '';
     var bar = h('div', {class:'admin-bar'});
-    // Кнопка перехода на сайт (слева)
+    // Кнопки управления (справа): Перейти на сайт и Выйти
     var visit = h('a', {text:'Перейти на сайт'}); visit.href = '/'; visit.className = 'btn';
-    var logout = h('button', {text:'Выйти'});
+    var logout = h('button', {text:'Выйти'}); logout.className = 'btn';
+    var actions = el('div','actions');
+    actions.appendChild(visit);
+    actions.appendChild(logout);
     logout.addEventListener('click', function(){
       try{ localStorage.removeItem(LS_REMEMBER); }catch(e){}
       fetch('/crud.php?action=logout', {method:'POST'}).finally(mountLogin);
     });
-    bar.appendChild(visit);
-    bar.appendChild(logout);
+    // Размещаем контейнер с кнопками справа через spacer + actions (grid: 1fr auto)
+    var spacer = el('div','spacer');
+    bar.appendChild(spacer);
+    bar.appendChild(actions);
 
     var shell = el('div','admin-shell');
     var left = el('div','admin-left');
