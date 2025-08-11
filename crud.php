@@ -600,7 +600,7 @@ function admin_js_bundle(): string {
         },
         // Отключаем коллаборационные/облачные и лишние плагины, чтобы не требовались channelId и т.п.
         removePlugins: [
-          'MediaEmbed','List','Indent',
+          'MediaEmbed','List','Indent','IndentBlock',
           'RealTimeCollaborativeComments','RealTimeCollaborativeTrackChanges','RealTimeCollaborativeRevisionHistory',
           'PresenceList','Comments','TrackChanges','TrackChangesData','RevisionHistory',
           'CloudServices','CKBox','CKBoxUtils','CKBoxImageEdit','CKBoxImageEditUI','CKBoxImageEditEditing','CKFinder','EasyImage',
@@ -700,7 +700,7 @@ function admin_js_bundle(): string {
               ]
             },
             removePlugins: [
-              'MediaEmbed','List','Indent',
+              'MediaEmbed','List','Indent','IndentBlock',
               'RealTimeCollaborativeComments','RealTimeCollaborativeTrackChanges','RealTimeCollaborativeRevisionHistory',
               'PresenceList','Comments','TrackChanges','TrackChangesData','RevisionHistory',
               'CloudServices','CKBox','CKBoxUtils','CKBoxImageEdit','CKBoxImageEditUI','CKBoxImageEditEditing','CKFinder','EasyImage',
@@ -825,7 +825,7 @@ function admin_js_bundle(): string {
               ]
             },
             removePlugins: [
-              'MediaEmbed','List','Indent',
+              'MediaEmbed','List','Indent','IndentBlock',
               'RealTimeCollaborativeComments','RealTimeCollaborativeTrackChanges','RealTimeCollaborativeRevisionHistory',
               'PresenceList','Comments','TrackChanges','TrackChangesData','RevisionHistory',
               'CloudServices','CKBox','CKBoxUtils','CKBoxImageEdit','CKBoxImageEditUI','CKBoxImageEditEditing','CKFinder','EasyImage',
