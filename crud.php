@@ -904,29 +904,16 @@ function admin_js_bundle(): string {
 
     btnSave.addEventListener('click', function(){
       send(false)
-        .then(function(res){
-          // после сохранения перезагружаем дерево и перерисовываем список уроков секции
-          return api('/crud.php?action=tree').then(function(d){
-            data = d; levels = d.levels||[];
-            var s = findSection(ls.section_id);
-            if (s) renderLessons(s);
-            return res;
-          });
-        })
         .then(function(){ flash(status1,'Сохранено'); })
+        .then(function(){ dlg.remove(); })
+        .then(function(){ mountPanel(); })
         .catch(function(e){ if(e && e.message==='Неверный slug') return; alert('Ошибка: '+e.message); });
     });
     btnPub.addEventListener('click', function(){
       send(true)
-        .then(function(res){
-          return api('/crud.php?action=tree').then(function(d){
-            data = d; levels = d.levels||[];
-            var s = findSection(ls.section_id);
-            if (s) renderLessons(s);
-            return res;
-          });
-        })
         .then(function(){ flash(status2,'Опубликовано'); })
+        .then(function(){ dlg.remove(); })
+        .then(function(){ mountPanel(); })
         .catch(function(e){ if(e && e.message==='Неверный slug') return; alert('Ошибка: '+e.message); });
     });
 
