@@ -43,7 +43,6 @@ if ($uri === '/bod') {
 }
 
 // Главная: список уровней
-if ($uri === '') { $uri = '/'; }
 if ($uri === '/') {
     $levels = db_get_levels();
     render_header('Уровни');

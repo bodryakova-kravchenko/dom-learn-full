@@ -2,20 +2,18 @@
 // Global JS for DOMLearn: theme toggle and lesson test handlers.
 
 (function(){
-  // Apply saved theme immediately on script load (before DOMContentLoaded) to avoid FOUC
-  try {
-    var key = 'domlearn-theme';
-    var saved = localStorage.getItem(key);
-    if (saved) {
-      document.addEventListener('DOMContentLoaded', function(){
-        document.body.className = saved;
-      });
-    }
-  } catch (e) {}
+  var KEY = 'domlearn-theme';
 
   document.addEventListener('DOMContentLoaded', function(){
+    // Apply saved theme once DOM is ready
+    try {
+      var saved = localStorage.getItem(KEY);
+      if (saved) {
+        document.body.classList.remove('theme-dark','theme-light');
+        document.body.classList.add(saved);
+      }
+    } catch (e) {}
     // Theme toggle
-    var key = 'domlearn-theme';
     var btn = document.getElementById('themeToggle');
     if (btn) {
       btn.addEventListener('click', function(){
@@ -23,7 +21,7 @@
         var next = cur === 'theme-dark' ? 'theme-light' : 'theme-dark';
         document.body.classList.remove('theme-dark','theme-light');
         document.body.classList.add(next);
-        try { localStorage.setItem(key, next); } catch (e) {}
+        try { localStorage.setItem(KEY, next); } catch (e) {}
       });
     }
 
