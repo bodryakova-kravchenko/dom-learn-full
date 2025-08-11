@@ -305,6 +305,18 @@ function admin_js_bundle(): string {
   'use strict';
 
   var LS_REMEMBER = 'domlearn-remember';
+  var __dndCssInjected = false;
+
+  function injectDndStyles(){
+    if (__dndCssInjected) return; __dndCssInjected = true;
+    var st = document.createElement('style');
+    st.textContent = '\n'
+      + '.admin-right .list .item, .admin-left .list .item{ cursor: grab; user-select: none; }\n'
+      + '.admin-right .list .item.dragging, .admin-left .list .item.dragging{ opacity: .6; cursor: grabbing; }\n'
+      + '.admin-right .list .item.drag-over, .admin-left .list .item.drag-over{ outline: 2px dashed #4a90e2; outline-offset: 2px; }\n'
+      + '.dnd-hint{ font-size: 12px; color: #666; margin: 6px 0 10px; }\n';
+    document.head.appendChild(st);
+  }
 
   function h(tag, attrs){
     var el = document.createElement(tag);
@@ -422,6 +434,10 @@ function admin_js_bundle(): string {
           .catch(function(e){ alert('Ошибка: '+e.message); });
       });
       sectionsWrap.appendChild(addBtn);
+      // Визуальная подсказка по DnD
+      injectDndStyles();
+      var hintSec = el('div','dnd-hint','Подсказка: перетаскивайте разделы мышкой, чтобы изменить порядок.');
+      sectionsWrap.appendChild(hintSec);
 
       var ul = el('ul','list'); ul.setAttribute('data-level', lv.id);
       (lv.sections||[]).forEach(function(sec){
@@ -450,9 +466,11 @@ function admin_js_bundle(): string {
 
       // Drag & Drop
       var dragId = null;
-      ul.addEventListener('dragstart', function(e){ var t=e.target.closest('li.item'); if(!t) return; dragId=t.dataset.id; e.dataTransfer.effectAllowed='move'; });
-      ul.addEventListener('dragover', function(e){ e.preventDefault(); });
-      ul.addEventListener('drop', function(e){ e.preventDefault(); var t=e.target.closest('li.item'); if(!t||!dragId) return; if(t.dataset.id===dragId) return; ul.insertBefore(document.querySelector('li.item[data-id="'+dragId+'"]'), t); saveReorderSections(); });
+      ul.addEventListener('dragstart', function(e){ var t=e.target.closest('li.item'); if(!t) return; dragId=t.dataset.id; t.classList.add('dragging'); if(e.dataTransfer){ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', dragId); }});
+      ul.addEventListener('dragend', function(e){ var t=e.target.closest('li.item'); if(t) t.classList.remove('dragging'); Array.prototype.forEach.call(ul.querySelectorAll('.drag-over'), function(x){ x.classList.remove('drag-over'); }); });
+      ul.addEventListener('dragover', function(e){ e.preventDefault(); var t=e.target.closest('li.item'); if(!t) return; if(t.dataset.id!==dragId) t.classList.add('drag-over'); });
+      ul.addEventListener('dragleave', function(e){ var t=e.target.closest('li.item'); if(t) t.classList.remove('drag-over'); });
+      ul.addEventListener('drop', function(e){ e.preventDefault(); var t=e.target.closest('li.item'); if(!t||!dragId) return; Array.prototype.forEach.call(ul.querySelectorAll('.drag-over'), function(x){ x.classList.remove('drag-over'); }); if(t.dataset.id===dragId) return; ul.insertBefore(document.querySelector('li.item[data-id="'+dragId+'"]'), t); saveReorderSections(); });
 
       function saveReorderSections(){
         var ids = Array.from(ul.querySelectorAll('li.item')).map(function(li){ return parseInt(li.dataset.id,10); });
@@ -476,6 +494,10 @@ function admin_js_bundle(): string {
       var addBtn = el('button','btn','➕ Добавить урок');
       addBtn.addEventListener('click', function(){ openLessonEditor({section_id: sec.id, title_ru:'', slug:'', lesson_order: null, is_published:false, content:{tests:[],tasks:[],theory_html:''}}, true); });
       lessonsWrap.appendChild(addBtn);
+      // Визуальная подсказка по DnD
+      injectDndStyles();
+      var hintLs = el('div','dnd-hint','Подсказка: перетаскивайте уроки мышкой, чтобы изменить порядок внутри раздела.');
+      lessonsWrap.appendChild(hintLs);
 
       var ul = el('ul','list'); ul.setAttribute('data-section', sec.id);
       (sec.lessons||[]).forEach(function(ls){
@@ -490,9 +512,11 @@ function admin_js_bundle(): string {
 
       // Drag & Drop
       var dragId = null;
-      ul.addEventListener('dragstart', function(e){ var t=e.target.closest('li.item'); if(!t) return; dragId=t.dataset.id; e.dataTransfer.effectAllowed='move'; });
-      ul.addEventListener('dragover', function(e){ e.preventDefault(); });
-      ul.addEventListener('drop', function(e){ e.preventDefault(); var t=e.target.closest('li.item'); if(!t||!dragId) return; if(t.dataset.id===dragId) return; ul.insertBefore(document.querySelector('li.item[data-id="'+dragId+'"]'), t); saveReorderLessons(); });
+      ul.addEventListener('dragstart', function(e){ var t=e.target.closest('li.item'); if(!t) return; dragId=t.dataset.id; t.classList.add('dragging'); if(e.dataTransfer){ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', dragId); }});
+      ul.addEventListener('dragend', function(e){ var t=e.target.closest('li.item'); if(t) t.classList.remove('dragging'); Array.prototype.forEach.call(ul.querySelectorAll('.drag-over'), function(x){ x.classList.remove('drag-over'); }); });
+      ul.addEventListener('dragover', function(e){ e.preventDefault(); var t=e.target.closest('li.item'); if(!t) return; if(t.dataset.id!==dragId) t.classList.add('drag-over'); });
+      ul.addEventListener('dragleave', function(e){ var t=e.target.closest('li.item'); if(t) t.classList.remove('drag-over'); });
+      ul.addEventListener('drop', function(e){ e.preventDefault(); var t=e.target.closest('li.item'); if(!t||!dragId) return; Array.prototype.forEach.call(ul.querySelectorAll('.drag-over'), function(x){ x.classList.remove('drag-over'); }); if(t.dataset.id===dragId) return; ul.insertBefore(document.querySelector('li.item[data-id="'+dragId+'"]'), t); saveReorderLessons(); });
 
       function saveReorderLessons(){
         var ids = Array.from(ul.querySelectorAll('li.item')).map(function(li){ return parseInt(li.dataset.id,10); });
@@ -1034,13 +1058,32 @@ function api_sections_reorder(): void {
     $level_id = (int)($data['level_id'] ?? 0);
     $ids = $data['ids'] ?? [];
     if ($level_id<=0 || !is_array($ids) || empty($ids)) { http_response_code(400); json_response(['error'=>'params']); return; }
-    db()->beginTransaction();
+    $pdo = db();
+    $pdo->beginTransaction();
     try{
-        $ord=1; $st = db()->prepare('UPDATE sections SET section_order=? WHERE id=? AND level_id=?');
-        foreach ($ids as $id) { $st->execute([$ord++, (int)$id, $level_id]); }
-        db()->commit();
+        // Фаза 1: временно сдвигаем за пределы, чтобы избежать конфликтов уникальности
+        $place = implode(',', array_fill(0, count($ids), '?'));
+        $tmpSql = 'UPDATE sections SET section_order = section_order + 1000 WHERE level_id = ? AND id IN (' . $place . ')';
+        $tmpStmt = $pdo->prepare($tmpSql);
+        $tmpStmt->execute(array_merge([$level_id], array_map('intval', $ids)));
+
+        // Фаза 2: проставляем целевые порядки через CASE
+        $case = [];
+        $params = [];
+        $ord = 1;
+        foreach ($ids as $id) {
+            $id = (int)$id;
+            $case[] = 'WHEN id = ? THEN ?';
+            $params[] = $id; // для id в WHEN
+            $params[] = $ord++; // для значения section_order
+        }
+        $sql = 'UPDATE sections SET section_order = CASE ' . implode(' ', $case) . ' ELSE section_order END WHERE level_id = ? AND id IN (' . $place . ')';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(array_merge($params, [$level_id], array_map('intval', $ids)));
+
+        $pdo->commit();
         json_response(['ok'=>true]);
-    }catch(Throwable $e){ db()->rollBack(); http_response_code(500); json_response(['error'=>$e->getMessage()]); }
+    }catch(Throwable $e){ $pdo->rollBack(); http_response_code(500); json_response(['error'=>$e->getMessage()]); }
 }
 
 // ================== LESSONS: save/delete/reorder ==================
@@ -1097,11 +1140,30 @@ function api_lessons_reorder(): void {
     $section_id = (int)($data['section_id'] ?? 0);
     $ids = $data['ids'] ?? [];
     if ($section_id<=0 || !is_array($ids) || empty($ids)) { http_response_code(400); json_response(['error'=>'params']); return; }
-    db()->beginTransaction();
+    $pdo = db();
+    $pdo->beginTransaction();
     try{
-        $ord=1; $st = db()->prepare('UPDATE lessons SET lesson_order=? WHERE id=? AND section_id=?');
-        foreach ($ids as $id) { $st->execute([$ord++, (int)$id, $section_id]); }
-        db()->commit();
+        // Фаза 1: временный сдвиг, чтобы не было конфликтов уникальных ключей
+        $place = implode(',', array_fill(0, count($ids), '?'));
+        $tmpSql = 'UPDATE lessons SET lesson_order = lesson_order + 1000 WHERE section_id = ? AND id IN (' . $place . ')';
+        $tmpStmt = $pdo->prepare($tmpSql);
+        $tmpStmt->execute(array_merge([$section_id], array_map('intval', $ids)));
+
+        // Фаза 2: финальный порядок через CASE
+        $case = [];
+        $params = [];
+        $ord = 1;
+        foreach ($ids as $id) {
+            $id = (int)$id;
+            $case[] = 'WHEN id = ? THEN ?';
+            $params[] = $id; // id
+            $params[] = $ord++; // новый lesson_order
+        }
+        $sql = 'UPDATE lessons SET lesson_order = CASE ' . implode(' ', $case) . ' ELSE lesson_order END WHERE section_id = ? AND id IN (' . $place . ')';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(array_merge($params, [$section_id], array_map('intval', $ids)));
+
+        $pdo->commit();
         json_response(['ok'=>true]);
-    }catch(Throwable $e){ db()->rollBack(); http_response_code(500); json_response(['error'=>$e->getMessage()]); }
+    }catch(Throwable $e){ $pdo->rollBack(); http_response_code(500); json_response(['error'=>$e->getMessage()]); }
 }
