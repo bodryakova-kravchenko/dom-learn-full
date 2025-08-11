@@ -217,7 +217,7 @@ if (count($parts) >= 1 && preg_match('~^(\d+)-([a-z-]+)$~', $parts[0], $m1)) {
                 $p = '/' . $parts[0] . '/' . $parts[1] . '/' . (int)$nav['prev']['lesson_order'] . '-' . e($nav['prev']['slug']);
                 echo '<a class="btn" href="' . $p . '">◀ Предыдущий</a>';
             }
-            echo '<a class="btn" href="/' . $parts[0] . '/' . $parts[1] . '">В оглавление</a>';
+            echo '<a class="btn" href="/' . $parts[0] . '/' . $parts[1] . '">В оглавление раздела</a>';
             if ($nav['next']) {
                 $n = '/' . $parts[0] . '/' . $parts[1] . '/' . (int)$nav['next']['lesson_order'] . '-' . e($nav['next']['slug']);
                 echo '<a class="btn" href="' . $n . '">Следующий ▶</a>';
