@@ -870,12 +870,18 @@ function admin_js_bundle(): string {
       // Перед отправкой валидируем и синхронизируем данные из конструкторов
       var err = validateBuilders();
       if (err){ alert(err); return Promise.reject(new Error(err)); }
+      // Клиентская проверка slug, чтобы показать подсказку вместо HTTP 400
+      var slugVal = inSlug.value.trim();
+      if (!/^[a-z-]+$/.test(slugVal)){
+        try{ inSlug.setCustomValidity('Неверный slug'); inSlug.reportValidity(); }finally{ setTimeout(function(){ try{ inSlug.setCustomValidity(''); }catch(e){} }, 2000); }
+        return Promise.reject(new Error('Неверный slug'));
+      }
       syncBuildersToTextareas();
       var payload = {
         id: ls.id||null,
         section_id: ls.section_id,
         title_ru: inTitle.value.trim(),
-        slug: inSlug.value.trim(),
+        slug: slugVal,
         is_published: !!isPublished,
         content: {
           tests: JSON.parse(taTests.value||'[]'),
@@ -886,8 +892,8 @@ function admin_js_bundle(): string {
       return api('/crud.php?action=lesson_save', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
     }
 
-    btnSave.addEventListener('click', function(){ send(false).then(function(){ flash(status1,'Сохранено'); }).catch(function(e){ alert('Ошибка: '+e.message); }); });
-    btnPub.addEventListener('click', function(){ send(true).then(function(){ flash(status2,'Опубликовано'); }).catch(function(e){ alert('Ошибка: '+e.message); }); });
+    btnSave.addEventListener('click', function(){ send(false).then(function(){ flash(status1,'Сохранено'); }).catch(function(e){ if(e && e.message==='Неверный slug') return; alert('Ошибка: '+e.message); }); });
+    btnPub.addEventListener('click', function(){ send(true).then(function(){ flash(status2,'Опубликовано'); }).catch(function(e){ if(e && e.message==='Неверный slug') return; alert('Ошибка: '+e.message); }); });
 
     dlg.addEventListener('click', function(e){ if(e.target===dlg) dlg.remove(); });
   }
