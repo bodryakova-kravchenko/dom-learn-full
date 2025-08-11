@@ -445,11 +445,7 @@ function admin_js_bundle(): string {
             .then(function(d){ data=d; levels=d.levels||[]; currentSectionId=null; renderSections(); lessonsWrap.innerHTML=''; })
             .catch(function(e){ alert('Ошибка: '+e.message); });
         });
-              if (s) renderLessons(s);
-            })
-            .catch(function(e){ alert('Ошибка: '+e.message); });
-        });
-        li.appendChild(a); li.appendChild(del); ul.appendChild(li);
+        li.appendChild(a); li.appendChild(edit); li.appendChild(del); ul.appendChild(li);
       });
 
       lessonsWrap.appendChild(ul);
