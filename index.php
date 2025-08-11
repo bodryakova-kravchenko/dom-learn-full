@@ -104,8 +104,8 @@ if (count($parts) >= 1 && preg_match('~^(\d+)-([a-z-]+)$~', $parts[0], $m1)) {
         $sections = db_get_sections_by_level_id((int)$level['id']);
         render_header($level['title_ru']);
         breadcrumbs([
-            ['href' => '/', 'label' => 'Уровни'],
-            ['href' => '', 'label' => $level['title_ru']],
+            ['href' => '/', 'label' => 'Главная'],
+            ['href' => '', 'label' => 'Уровень-' . $levelNumber . '-' . $level['title_ru']],
         ]);
         echo '<main class="container">';
         echo '<h1>' . e($level['title_ru']) . '</h1>';
@@ -135,9 +135,9 @@ if (count($parts) >= 1 && preg_match('~^(\d+)-([a-z-]+)$~', $parts[0], $m1)) {
             $lessons = db_get_lessons_by_section_id((int)$section['id']);
             render_header($section['title_ru']);
             breadcrumbs([
-                ['href' => '/', 'label' => 'Уровни'],
-                ['href' => '/' . $parts[0], 'label' => $level['title_ru']],
-                ['href' => '', 'label' => $section['title_ru']],
+                ['href' => '/', 'label' => 'Главная'],
+                ['href' => '/' . $parts[0], 'label' => 'Уровень-' . $levelNumber . '-' . $level['title_ru']],
+                ['href' => '', 'label' => 'Раздел-' . $sectionOrder . '-' . $section['title_ru']],
             ]);
             echo '<main class="container">';
             echo '<h1>' . e($section['title_ru']) . '</h1>';
@@ -170,10 +170,10 @@ if (count($parts) >= 1 && preg_match('~^(\d+)-([a-z-]+)$~', $parts[0], $m1)) {
 
             render_header($lesson['title_ru']);
             breadcrumbs([
-                ['href' => '/', 'label' => 'Уровни'],
-                ['href' => '/' . $parts[0], 'label' => $level['title_ru']],
-                ['href' => '/' . $parts[0] . '/' . $parts[1], 'label' => $section['title_ru']],
-                ['href' => '', 'label' => $lesson['title_ru']],
+                ['href' => '/', 'label' => 'Главная'],
+                ['href' => '/' . $parts[0], 'label' => 'Уровень-' . $levelNumber . '-' . $level['title_ru']],
+                ['href' => '/' . $parts[0] . '/' . $parts[1], 'label' => 'Раздел-' . $sectionOrder . '-' . $section['title_ru']],
+                ['href' => '', 'label' => 'Урок-' . $lessonOrder . '-' . $lesson['title_ru']],
             ]);
             echo '<main class="container lesson">';
             echo '<article class="lesson-body">';
