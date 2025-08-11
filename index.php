@@ -22,6 +22,19 @@ $uri = rtrim($uri, '/');
 
 // Корень сайта может быть не в / если развернуто в подпапке — используется относительная навигация
 
+// Обслуживаем favicon по пути /favicon.ico, чтобы исключить 404
+if ($uri === '/favicon.ico') {
+    $fav = __DIR__ . '/images/favicon.ico';
+    if (is_file($fav)) {
+        header('Content-Type: image/x-icon');
+        header('Cache-Control: public, max-age=604800'); // 7 days
+        readfile($fav);
+    } else {
+        http_response_code(404);
+    }
+    exit;
+}
+
 // Маршрут: /bod — админка (HTML рендер здесь, JS и весь CRUD — в crud.php)
 if ($uri === '' || $uri === false) { $uri = '/'; }
 if ($uri === '/bod') {
@@ -233,6 +246,7 @@ function render_header(string $title, bool $with_topbar = true): void {
     echo '<!doctype html><html lang="ru"><head>';
     echo '<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">';
     echo '<title>' . e($title) . ' — DOMLearn</title>';
+    echo '<link rel="icon" href="/images/favicon.ico" type="image/x-icon">';
     echo '<link rel="stylesheet" href="/style.css">';
     echo '<script src="/app.js?v=' . filemtime(__DIR__ . '/app.js') . '" defer></script>';
     echo '</head><body class="theme-light">';
