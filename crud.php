@@ -549,35 +549,12 @@ function admin_js_bundle(): string {
     function getClassicCtor(){ return (window.ClassicEditor) || (window.CKEDITOR && window.CKEDITOR.ClassicEditor) || null; }
     function ensureCKE(cb){
       if (getClassicCtor()) return cb();
-      // Пробуем стандартные пути распаковки
-      loadScript('/ckeditor/ckeditor5/ckeditor5.umd.js', function(errU){
-        if (!errU && getClassicCtor()) return cb();
-        loadScript('/ckeditor/ckeditor5/ckeditor5.js', function(errX){
-          if (!errX && getClassicCtor()) return cb();
-          loadScript('/ckeditor/ckeditor5/ckeditor.js', function(err0){
-            if (!err0 && getClassicCtor()) return cb();
-            loadScript('/ckeditor/ckeditor.js', function(err){
-              if (!err && getClassicCtor()) return cb();
-              loadScript('/ckeditor/build/ckeditor.js', function(err2){
-                if (!err2 && getClassicCtor()) return cb();
-                // Относительные пути (если каталог ckeditor рядом с корнем приложения)
-                loadScript('ckeditor/ckeditor5/ckeditor5.umd.js', function(errUr){
-                  if (!errUr && getClassicCtor()) return cb();
-                  loadScript('ckeditor/ckeditor5/ckeditor5.js', function(errXr){
-                    if (!errXr && getClassicCtor()) return cb();
-                    loadScript('ckeditor/ckeditor5/ckeditor.js', function(err3){
-                      if (!err3 && getClassicCtor()) return cb();
-                      loadScript('ckeditor/build/ckeditor.js', function(err4){
-                        if (!getClassicCtor()) console.warn('CKEditor: не найден глобальный ClassicEditor. Используйте UMD Classic build (ckeditor/build/ckeditor.js) или укажите корректный путь.');
-                        cb();
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
+      // Загружаем единственный корректный билд CKEditor 5 (super-build) с CDN,
+      // чтобы избежать 404 и ошибки "duplicated modules".
+      var cdnUrl = 'https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js';
+      loadScript(cdnUrl, function(){
+        if (!getClassicCtor()) console.warn('CKEditor: ClassicEditor не найден после загрузки CDN build: '+cdnUrl);
+        cb();
       });
     }
     function UploadAdapter(loader){ this.loader = loader; }
@@ -607,7 +584,8 @@ function admin_js_bundle(): string {
             '|',
             'bold', 'italic', 'link',
             '|',
-            'alignment:left', 'alignment:center', 'alignment:right', 'alignment:justify',
+            // В super-build используется один пункт 'alignment' (выпадающий список)
+            'alignment',
             '|',
             'imageUpload', 'blockQuote',
             '|',
