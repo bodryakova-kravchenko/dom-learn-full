@@ -451,6 +451,58 @@ function admin_js_bundle(): string {
       sectionsWrap.appendChild(ul);
     }
 
+    // Поиск раздела по id в текущем выбранном уровне
+    function findSection(id){
+      var lv = levels[currentLevelIndex] || {}; var ss = (lv.sections||[]);
+      for (var i=0;i<ss.length;i++){ if (ss[i].id === id) return ss[i]; }
+      return null;
+    }
+
+    // Рендер списка уроков выбранного раздела
+    function renderLessons(sec){
+      lessonsWrap.innerHTML = '';
+      var head = el('div','head'); head.textContent = 'Уроки — '+sec.title_ru; lessonsWrap.appendChild(head);
+
+      var addBtn = el('button','btn','➕ Добавить урок');
+      addBtn.addEventListener('click', function(){
+        // Открываем редактор нового урока (с пустым контентом)
+        openLessonEditor({ id:null, section_id: sec.id, title_ru:'', slug:'', is_published:0, content:{ tests:[], tasks:[], theory_html:'' } }, true);
+      });
+      lessonsWrap.appendChild(addBtn);
+
+      var ul = el('ul','list'); ul.setAttribute('data-section', sec.id);
+      (sec.lessons||[]).forEach(function(ls){
+        var li = el('li','item'); li.dataset.id = ls.id;
+        var title = el('a', null, (ls.lesson_order||0)+'. '+ls.title_ru + (ls.is_published? ' ✅' : ''));
+        title.href = '#';
+        title.addEventListener('click', function(ev){ ev.preventDefault(); openLessonEditor(ls, false); });
+        var edit = el('button','sm','✎'); edit.title='Редактировать';
+        edit.addEventListener('click', function(){ openLessonEditor(ls, false); });
+        var del = el('button','sm','🗑'); del.title='Удалить';
+        del.addEventListener('click', function(){
+          if(!confirm('Удалить урок?')) return;
+          api('/crud.php?action=lesson_delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: ls.id })})
+            .then(function(){ return api('/crud.php?action=tree'); })
+            .then(function(d){
+              // Обновим локальные данные и перерисуем список для текущего раздела
+              data = d; levels = d.levels||[];
+              // Найдём раздел с тем же id (он может быть в текущем уровне)
+              var s = findSection(sec.id);
+              if(!s){ // если уровень мог измениться — попробуем найти по всем уровням
+                outer: for (var i=0;i<levels.length;i++){
+                  var ss = levels[i].sections||[];
+                  for (var j=0;j<ss.length;j++){ if (ss[j].id===sec.id){ currentLevelIndex=i; s=ss[j]; break outer; } }
+                }
+              }
+              if (s) renderLessons(s); else lessonsWrap.innerHTML='';
+            })
+            .catch(function(e){ alert('Ошибка: '+e.message); });
+        });
+        li.appendChild(title); li.appendChild(edit); li.appendChild(del); ul.appendChild(li);
+      });
+      lessonsWrap.appendChild(ul);
+    }
+
     // Если передан sectionId для восстановления контекста — найдём нужный уровень и откроем раздел
     if (openSectionId){
       for (var i=0;i<levels.length;i++){
