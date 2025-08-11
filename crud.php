@@ -448,7 +448,7 @@ function admin_js_bundle(): string {
         li.appendChild(a); li.appendChild(edit); li.appendChild(del); ul.appendChild(li);
       });
 
-      lessonsWrap.appendChild(ul);
+      sectionsWrap.appendChild(ul);
     }
 
     // Если передан sectionId для восстановления контекста — найдём нужный уровень и откроем раздел
