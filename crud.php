@@ -470,7 +470,17 @@ function admin_js_bundle(): string {
         var a = el('a',null, pub+' '+ls.lesson_order+'. '+ls.title_ru);
         a.href='#'; a.addEventListener('click', function(ev){ ev.preventDefault(); openLessonEditor(ls,false); });
         var del = el('button','sm','🗑'); del.title='Удалить';
-        del.addEventListener('click', function(){ if(!confirm('Удалить урок и его файлы?')) return; api('/crud.php?action=lesson_delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:ls.id})}).then(function(){ return api('/crud.php?action=tree'); }).then(function(d){ data=d; var s=findSection(sec.id); if(s) renderLessons(s); }).catch(function(e){ alert('Ошибка: '+e.message); }); });
+        del.addEventListener('click', function(){
+          if(!confirm('Удалить урок и его файлы?')) return;
+          api('/crud.php?action=lesson_delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: ls.id })})
+            .then(function(){ return api('/crud.php?action=tree'); })
+            .then(function(d){
+              data = d; levels = d.levels||[]; // обновляем кеш уровней перед рендером
+              var s = findSection(sec.id);
+              if (s) renderLessons(s);
+            })
+            .catch(function(e){ alert('Ошибка: '+e.message); });
+        });
         li.appendChild(a); li.appendChild(del); ul.appendChild(li);
       });
 
@@ -892,8 +902,33 @@ function admin_js_bundle(): string {
       return api('/crud.php?action=lesson_save', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
     }
 
-    btnSave.addEventListener('click', function(){ send(false).then(function(){ flash(status1,'Сохранено'); }).catch(function(e){ if(e && e.message==='Неверный slug') return; alert('Ошибка: '+e.message); }); });
-    btnPub.addEventListener('click', function(){ send(true).then(function(){ flash(status2,'Опубликовано'); }).catch(function(e){ if(e && e.message==='Неверный slug') return; alert('Ошибка: '+e.message); }); });
+    btnSave.addEventListener('click', function(){
+      send(false)
+        .then(function(res){
+          // после сохранения перезагружаем дерево и перерисовываем список уроков секции
+          return api('/crud.php?action=tree').then(function(d){
+            data = d; levels = d.levels||[];
+            var s = findSection(ls.section_id);
+            if (s) renderLessons(s);
+            return res;
+          });
+        })
+        .then(function(){ flash(status1,'Сохранено'); })
+        .catch(function(e){ if(e && e.message==='Неверный slug') return; alert('Ошибка: '+e.message); });
+    });
+    btnPub.addEventListener('click', function(){
+      send(true)
+        .then(function(res){
+          return api('/crud.php?action=tree').then(function(d){
+            data = d; levels = d.levels||[];
+            var s = findSection(ls.section_id);
+            if (s) renderLessons(s);
+            return res;
+          });
+        })
+        .then(function(){ flash(status2,'Опубликовано'); })
+        .catch(function(e){ if(e && e.message==='Неверный slug') return; alert('Ошибка: '+e.message); });
+    });
 
     dlg.addEventListener('click', function(e){ if(e.target===dlg) dlg.remove(); });
   }
