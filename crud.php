@@ -543,18 +543,24 @@ function admin_js_bundle(): string {
 
     function flash(stEl, text){ stEl.textContent = '✓ '+text; setTimeout(function(){ stEl.textContent=''; }, 5000); }
 
-    // CKEditor 5 (локально из каталога /ckeditor)
+    // CKEditor 5 (загрузка из CDN, защита от параллельной загрузки)
     var ckeEditor = null;
     function loadScript(src, cb){ var s=document.createElement('script'); s.src=src; s.onload=cb; s.onerror=function(){ cb(new Error('Fail '+src)); }; document.head.appendChild(s); }
     function getClassicCtor(){ return (window.ClassicEditor) || (window.CKEDITOR && window.CKEDITOR.ClassicEditor) || null; }
+    // Состояние загрузки CKE: 0 — не загружен, 1 — загружается, 2 — готов
+    var __ckeState = 0; var __ckeWaiters = [];
     function ensureCKE(cb){
       if (getClassicCtor()) return cb();
-      // Загружаем единственный корректный билд CKEditor 5 (super-build) с CDN,
-      // чтобы избежать 404 и ошибки "duplicated modules".
+      if (__ckeState === 2) return cb();
+      if (__ckeState === 1){ __ckeWaiters.push(cb); return; }
+      __ckeState = 1; __ckeWaiters.push(cb);
+      // Загружаем единственный корректный билд CKEditor 5 (super-build) с CDN
       var cdnUrl = 'https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js';
       loadScript(cdnUrl, function(){
         if (!getClassicCtor()) console.warn('CKEditor: ClassicEditor не найден после загрузки CDN build: '+cdnUrl);
-        cb();
+        __ckeState = 2;
+        var list = __ckeWaiters.slice(); __ckeWaiters.length = 0;
+        list.forEach(function(fn){ try{ fn(); }catch(e){} });
       });
     }
     function UploadAdapter(loader){ this.loader = loader; }
@@ -592,7 +598,16 @@ function admin_js_bundle(): string {
             'undo', 'redo'
           ]
         },
-        removePlugins: [ 'MediaEmbed', 'List', 'Indent' ]
+        // Отключаем коллаборационные/облачные и лишние плагины, чтобы не требовались channelId и т.п.
+        removePlugins: [
+          'MediaEmbed','List','Indent',
+          'RealTimeCollaborativeComments','RealTimeCollaborativeTrackChanges','RealTimeCollaborativeRevisionHistory',
+          'PresenceList','Comments','TrackChanges','TrackChangesData','RevisionHistory',
+          'CloudServices','CKBox','CKFinder','EasyImage',
+          'ExportPdf','ExportWord','WProofreader','MathType',
+          'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
+          'AIAssistant'
+        ]
       })
         .then(function(ed){
           ckeEditor = ed;
@@ -676,14 +691,23 @@ function admin_js_bundle(): string {
                 '|',
                 'bold', 'italic', 'link',
                 '|',
-                'alignment:left', 'alignment:center', 'alignment:right', 'alignment:justify',
+                // Используем единый пункт 'alignment'
+                'alignment',
                 '|',
                 'imageUpload', 'blockQuote',
                 '|',
                 'undo', 'redo'
               ]
             },
-            removePlugins: [ 'MediaEmbed', 'List', 'Indent' ]
+            removePlugins: [
+              'MediaEmbed','List','Indent',
+              'RealTimeCollaborativeComments','RealTimeCollaborativeTrackChanges','RealTimeCollaborativeRevisionHistory',
+              'PresenceList','Comments','TrackChanges','TrackChangesData','RevisionHistory',
+              'CloudServices','CKBox','CKFinder','EasyImage',
+              'ExportPdf','ExportWord','WProofreader','MathType',
+              'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
+              'AIAssistant'
+            ]
           })
             .then(function(ed){
               testsEditors.push({qid: qid, editor: ed});
@@ -792,14 +816,23 @@ function admin_js_bundle(): string {
                 '|',
                 'bold', 'italic', 'link',
                 '|',
-                'alignment:left', 'alignment:center', 'alignment:right', 'alignment:justify',
+                // Используем единый пункт 'alignment'
+                'alignment',
                 '|',
                 'imageUpload', 'blockQuote',
                 '|',
                 'undo', 'redo'
               ]
             },
-            removePlugins: [ 'MediaEmbed', 'List', 'Indent' ]
+            removePlugins: [
+              'MediaEmbed','List','Indent',
+              'RealTimeCollaborativeComments','RealTimeCollaborativeTrackChanges','RealTimeCollaborativeRevisionHistory',
+              'PresenceList','Comments','TrackChanges','TrackChangesData','RevisionHistory',
+              'CloudServices','CKBox','CKFinder','EasyImage',
+              'ExportPdf','ExportWord','WProofreader','MathType',
+              'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
+              'AIAssistant'
+            ]
           })
             .then(function(ed){
               tasksEditors.push({tid: tid, editor: ed, titleIn: titleIn});
