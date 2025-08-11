@@ -67,6 +67,9 @@ h1,h2,h3{ line-height:1.25; margin: 1rem 0 .5rem; }
 }
 .card h2 a, .card h3 a{ color:var(--fg); text-decoration:none; }
 .card h2 a:hover, .card h3 a:hover{ color:var(--primary); }
+/* Smaller variant for compact lesson cards on section page */
+.card-sm{ padding:14px; }
+.card-sm h3{ margin:0 0 6px; font-size:1.05rem; }
 
 /* ===== Главная: уровни -> разделы -> уроки ===== */
 .level-card{

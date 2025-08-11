@@ -144,9 +144,8 @@ if (count($parts) >= 1 && preg_match('~^(\d+)-([a-z-]+)$~', $parts[0], $m1)) {
             foreach ($lessons as $ls) {
                 if (!(int)$ls['is_published']) continue; // скрываем непубликованные
                 $path = '/' . $parts[0] . '/' . $parts[1] . '/' . ((int)$ls['lesson_order']) . '-' . e($ls['slug']);
-                echo '<article class="card">';
-                echo '<h3><a href="' . $path . '">' . e($ls['title_ru']) . '</a></h3>';
-                echo '<p class="muted">Урок ' . (int)$ls['lesson_order'] . '</p>';
+                echo '<article class="card card-sm">';
+                echo '<h3><a href="' . $path . '">Урок-' . (int)$ls['lesson_order'] . '-' . e($ls['title_ru']) . '</a></h3>';
                 echo '</article>';
             }
             echo '</div>';
