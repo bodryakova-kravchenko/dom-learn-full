@@ -616,7 +616,7 @@ function admin_js_bundle(): string {
           items: [
             'heading',
             '|',
-            'bold', 'italic', 'link',
+            'bold', 'italic', 'link', 'fontColor',
             '|',
             // В super-build используется один пункт 'alignment' (выпадающий список)
             'alignment',
@@ -626,7 +626,6 @@ function admin_js_bundle(): string {
             'undo', 'redo'
           ]
         },
-        // Отключаем коллаборационные/облачные и лишние плагины, чтобы не требовались channelId и т.п.
         removePlugins: [
           'MediaEmbed','List','Indent','IndentBlock',
           'RealTimeCollaborativeComments','RealTimeCollaborativeTrackChanges','RealTimeCollaborativeRevisionHistory',
@@ -721,7 +720,7 @@ function admin_js_bundle(): string {
               items: [
                 'heading',
                 '|',
-                'bold', 'italic', 'link',
+                'bold', 'italic', 'link', 'fontColor',
                 '|',
                 // Используем единый пункт 'alignment'
                 'alignment',
@@ -850,7 +849,7 @@ function admin_js_bundle(): string {
               items: [
                 'heading',
                 '|',
-                'bold', 'italic', 'link',
+                'bold', 'italic', 'link', 'fontColor',
                 '|',
                 // Используем единый пункт 'alignment'
                 'alignment',
