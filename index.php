@@ -140,7 +140,7 @@ if (count($parts) >= 1 && preg_match('~^(\d+)-([a-z-]+)$~', $parts[0], $m1)) {
                 ['href' => '', 'label' => 'Раздел-' . $sectionOrder . '-' . $section['title_ru']],
             ]);
             echo '<main class="container">';
-            echo '<h1>' . e($section['title_ru']) . '</h1>';
+            echo '<h1>Раздел-' . (int)$sectionOrder . '-' . e($section['title_ru']) . '</h1>';
             echo '<div class="grid cards">';
             foreach ($lessons as $ls) {
                 if (!(int)$ls['is_published']) continue; // скрываем непубликованные
@@ -152,7 +152,7 @@ if (count($parts) >= 1 && preg_match('~^(\d+)-([a-z-]+)$~', $parts[0], $m1)) {
             }
             echo '</div>';
             echo '<nav class="lesson-nav">';
-            echo '<a class="btn" href="/">На главную</a>';
+            echo '<a class="btn" href="/" style="margin-top:3vh">На главную</a>';
             echo '</nav>';
             echo '</main>';
             render_footer();
