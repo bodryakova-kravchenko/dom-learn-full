@@ -63,8 +63,7 @@ if ($uri === '/') {
             foreach ($sections as $sec) {
                 $sectionPath = $levelPath . '/' . ((int)$sec['section_order']) . '-' . e($sec['slug']);
                 echo '    <article class="section-card card">';
-                echo '      <h3 class="section-title"><a href="' . $sectionPath . '">' . e($sec['title_ru']) . '</a></h3>';
-                echo '      <span class="badge muted">Раздел ' . (int)$sec['section_order'] . '</span>';
+                echo '      <h3 class="section-title"><a href="' . $sectionPath . '">Раздел-' . (int)$sec['section_order'] . '-' . e($sec['title_ru']) . '</a></h3>';
 
                 // Уроки раздела
                 $lessons = db_get_lessons_by_section_id((int)$sec['id']);
