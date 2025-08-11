@@ -607,7 +607,9 @@ function admin_js_bundle(): string {
           'ExportPdf','ExportWord','WProofreader','MathType',
           'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
           'AIAssistant',
-          'MultiLevelList','PasteFromOfficeEnhanced','CaseChange'
+          'MultiLevelList','MultiLevelListUI','MultiLevelListEditing',
+          'PasteFromOfficeEnhanced','PasteFromOfficeEnhancedUI','PasteFromOfficeEnhancedEditing',
+          'CaseChange','CaseChangeUI','CaseChangeEditing'
         ]
       })
         .then(function(ed){
@@ -708,7 +710,9 @@ function admin_js_bundle(): string {
               'ExportPdf','ExportWord','WProofreader','MathType',
               'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
               'AIAssistant',
-              'MultiLevelList','PasteFromOfficeEnhanced','CaseChange'
+              'MultiLevelList','MultiLevelListUI','MultiLevelListEditing',
+              'PasteFromOfficeEnhanced','PasteFromOfficeEnhancedUI','PasteFromOfficeEnhancedEditing',
+              'CaseChange','CaseChangeUI','CaseChangeEditing'
             ]
           })
             .then(function(ed){
@@ -834,7 +838,9 @@ function admin_js_bundle(): string {
               'ExportPdf','ExportWord','WProofreader','MathType',
               'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
               'AIAssistant',
-              'MultiLevelList','PasteFromOfficeEnhanced','CaseChange'
+              'MultiLevelList','MultiLevelListUI','MultiLevelListEditing',
+              'PasteFromOfficeEnhanced','PasteFromOfficeEnhancedUI','PasteFromOfficeEnhancedEditing',
+              'CaseChange','CaseChangeUI','CaseChangeEditing'
             ]
           })
             .then(function(ed){
