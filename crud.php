@@ -606,7 +606,8 @@ function admin_js_bundle(): string {
           'CloudServices','CKBox','CKBoxUtils','CKBoxImageEdit','CKBoxImageEditUI','CKBoxImageEditEditing','CKFinder','EasyImage',
           'ExportPdf','ExportWord','WProofreader','MathType',
           'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
-          'AIAssistant'
+          'AIAssistant',
+          'MultiLevelList','PasteFromOfficeEnhanced','CaseChange'
         ]
       })
         .then(function(ed){
@@ -706,7 +707,8 @@ function admin_js_bundle(): string {
               'CloudServices','CKBox','CKBoxUtils','CKBoxImageEdit','CKBoxImageEditUI','CKBoxImageEditEditing','CKFinder','EasyImage',
               'ExportPdf','ExportWord','WProofreader','MathType',
               'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
-              'AIAssistant'
+              'AIAssistant',
+              'MultiLevelList','PasteFromOfficeEnhanced','CaseChange'
             ]
           })
             .then(function(ed){
@@ -831,7 +833,8 @@ function admin_js_bundle(): string {
               'CloudServices','CKBox','CKBoxUtils','CKBoxImageEdit','CKBoxImageEditUI','CKBoxImageEditEditing','CKFinder','EasyImage',
               'ExportPdf','ExportWord','WProofreader','MathType',
               'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
-              'AIAssistant'
+              'AIAssistant',
+              'MultiLevelList','PasteFromOfficeEnhanced','CaseChange'
             ]
           })
             .then(function(ed){
