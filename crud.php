@@ -473,7 +473,13 @@ function admin_js_bundle(): string {
       var ul = el('ul','list'); ul.setAttribute('data-section', sec.id);
       (sec.lessons||[]).forEach(function(ls){
         var li = el('li','item'); li.dataset.id = ls.id;
-        var title = el('a', null, (ls.lesson_order||0)+'. '+ls.title_ru + (ls.is_published? ' ✅' : ''));
+        var title = el('a', null, (ls.lesson_order||0)+'. '+ls.title_ru);
+        if (ls.is_published){
+          var ok = el('span', null, '✓');
+          ok.style.color = '#16a34a';
+          ok.style.marginLeft = '4px';
+          title.appendChild(ok);
+        }
         title.href = '#';
         title.addEventListener('click', function(ev){ ev.preventDefault(); openLessonEditor(ls, false); });
         var edit = el('button','sm','✎'); edit.title='Редактировать';
