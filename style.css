@@ -295,6 +295,9 @@ body.theme-dark .answer.wrong{
   /* Tablet-specific spacing for tests */
   .tests{ gap: 14px; }
   .tests .test-question{ padding: 12px; border-radius: 12px; }
+  
+  /* Admin: switch to single column up to 1280px */
+  .admin .admin-shell{ grid-template-columns: 1fr; }
 
   /* Cards and admin tweaks */
   .card{ padding: 16px; }
