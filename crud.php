@@ -603,7 +603,7 @@ function admin_js_bundle(): string {
           'MediaEmbed','List','Indent',
           'RealTimeCollaborativeComments','RealTimeCollaborativeTrackChanges','RealTimeCollaborativeRevisionHistory',
           'PresenceList','Comments','TrackChanges','TrackChangesData','RevisionHistory',
-          'CloudServices','CKBox','CKFinder','EasyImage',
+          'CloudServices','CKBox','CKBoxUtils','CKFinder','EasyImage',
           'ExportPdf','ExportWord','WProofreader','MathType',
           'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
           'AIAssistant'
@@ -703,7 +703,7 @@ function admin_js_bundle(): string {
               'MediaEmbed','List','Indent',
               'RealTimeCollaborativeComments','RealTimeCollaborativeTrackChanges','RealTimeCollaborativeRevisionHistory',
               'PresenceList','Comments','TrackChanges','TrackChangesData','RevisionHistory',
-              'CloudServices','CKBox','CKFinder','EasyImage',
+              'CloudServices','CKBox','CKBoxUtils','CKFinder','EasyImage',
               'ExportPdf','ExportWord','WProofreader','MathType',
               'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
               'AIAssistant'
@@ -828,7 +828,7 @@ function admin_js_bundle(): string {
               'MediaEmbed','List','Indent',
               'RealTimeCollaborativeComments','RealTimeCollaborativeTrackChanges','RealTimeCollaborativeRevisionHistory',
               'PresenceList','Comments','TrackChanges','TrackChangesData','RevisionHistory',
-              'CloudServices','CKBox','CKFinder','EasyImage',
+              'CloudServices','CKBox','CKBoxUtils','CKFinder','EasyImage',
               'ExportPdf','ExportWord','WProofreader','MathType',
               'SlashCommand','Template','DocumentOutline','FormatPainter','TableOfContents','Style','Pagination',
               'AIAssistant'
