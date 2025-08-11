@@ -202,6 +202,14 @@ body.theme-dark .answer.wrong{
 .admin{ margin-top: 5vh; }
 .admin .admin-bar{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:12px; }
 .admin .admin-bar button{ justify-self: end; max-width: 220px; }
+/* Контейнер с кнопками действий справа */
+.admin .admin-bar .actions{ display:flex; align-items:center; gap:3vw; }
+/* Выравниваем высоту ссылок и кнопок */
+.admin .admin-bar .btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:10px 14px; /* синхронизировано с .btn */
+  min-height:42px;   /* одинаковая визуальная высота */
+}
 .admin .admin-login{ display:grid; gap:12px; max-width:420px; margin-top:12px; }
 .admin .admin-login form{ display:grid; gap:10px; }
 .admin .admin-login input[type="text"],
