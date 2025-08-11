@@ -352,7 +352,7 @@ function admin_js_bundle(): string {
 
   function el(tag, cls, txt){ var x=document.createElement(tag); if(cls) x.className=cls; if(txt) x.textContent=txt; return x; }
 
-  function mountPanel(){
+  function mountPanel(openSectionId){
     var root = document.getElementById('adminApp');
     root.innerHTML = '';
     var bar = h('div', {class:'admin-bar'});
@@ -381,11 +381,11 @@ function admin_js_bundle(): string {
 
     // Загрузка дерева
     api('/crud.php?action=tree').then(function(data){
-      renderTree(left, right, data);
+      renderTree(left, right, data, openSectionId);
     }).catch(function(err){ left.textContent = 'Ошибка загрузки: '+err.message; });
   }
 
-  function renderTree(left, right, data){
+  function renderTree(left, right, data, openSectionId){
     left.innerHTML = '';
     right.innerHTML = '';
     var levels = data.levels || [];
@@ -445,38 +445,6 @@ function admin_js_bundle(): string {
             .then(function(d){ data=d; levels=d.levels||[]; currentSectionId=null; renderSections(); lessonsWrap.innerHTML=''; })
             .catch(function(e){ alert('Ошибка: '+e.message); });
         });
-        li.appendChild(a); li.appendChild(edit); li.appendChild(del); ul.appendChild(li);
-      });
-
-      sectionsWrap.appendChild(ul);
-    }
-
-    function findSection(id){
-      for (var i=0;i<levels.length;i++){ var ss = levels[i].sections||[]; for (var j=0;j<ss.length;j++){ if(ss[j].id===id) return ss[j]; } }
-      return null;
-    }
-
-    function renderLessons(sec){
-      lessonsWrap.innerHTML='';
-      var head = el('div','head'); head.textContent = 'Уроки — '+sec.title_ru; lessonsWrap.appendChild(head);
-      var addBtn = el('button','btn','➕ Добавить урок');
-      addBtn.addEventListener('click', function(){ openLessonEditor({section_id: sec.id, title_ru:'', slug:'', lesson_order: null, is_published:false, content:{tests:[],tasks:[],theory_html:''}}, true); });
-      lessonsWrap.appendChild(addBtn);
-
-      var ul = el('ul','list'); ul.setAttribute('data-section', sec.id);
-      (sec.lessons||[]).forEach(function(ls){
-        var li = el('li','item'); li.dataset.id = ls.id;
-        var pub = ls.is_published? '🟢' : '⚪';
-        var a = el('a',null, pub+' '+ls.lesson_order+'. '+ls.title_ru);
-        a.href='#'; a.addEventListener('click', function(ev){ ev.preventDefault(); openLessonEditor(ls,false); });
-        var del = el('button','sm','🗑'); del.title='Удалить';
-        del.addEventListener('click', function(){
-          if(!confirm('Удалить урок и его файлы?')) return;
-          api('/crud.php?action=lesson_delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: ls.id })})
-            .then(function(){ return api('/crud.php?action=tree'); })
-            .then(function(d){
-              data = d; levels = d.levels||[]; // обновляем кеш уровней перед рендером
-              var s = findSection(sec.id);
               if (s) renderLessons(s);
             })
             .catch(function(e){ alert('Ошибка: '+e.message); });
@@ -487,6 +455,25 @@ function admin_js_bundle(): string {
       lessonsWrap.appendChild(ul);
     }
 
+    // Если передан sectionId для восстановления контекста — найдём нужный уровень и откроем раздел
+    if (openSectionId){
+      for (var i=0;i<levels.length;i++){
+        var secs = (levels[i].sections||[]);
+        for (var j=0;j<secs.length;j++){
+          if (secs[j].id === openSectionId){ currentLevelIndex = i; currentSectionId = openSectionId; break; }
+        }
+        if (currentSectionId) break;
+      }
+      renderSections();
+      // Если есть утилита поиска раздела — используем её, иначе найдём напрямую
+      var s = (typeof findSection==='function') ? findSection(openSectionId) : (function(){
+        var lv = levels[currentLevelIndex] || {}; var ss = (lv.sections||[]);
+        for (var k=0;k<ss.length;k++){ if (ss[k].id === openSectionId) return ss[k]; }
+        return null;
+      })();
+      if (s && typeof renderLessons==='function'){ renderLessons(s); }
+      return;
+    }
     selectLevel(0);
   }
 
@@ -906,14 +893,14 @@ function admin_js_bundle(): string {
       send(false)
         .then(function(){ flash(status1,'Сохранено'); })
         .then(function(){ dlg.remove(); })
-        .then(function(){ mountPanel(); })
+        .then(function(){ mountPanel(ls.section_id); })
         .catch(function(e){ if(e && e.message==='Неверный slug') return; alert('Ошибка: '+e.message); });
     });
     btnPub.addEventListener('click', function(){
       send(true)
         .then(function(){ flash(status2,'Опубликовано'); })
         .then(function(){ dlg.remove(); })
-        .then(function(){ mountPanel(); })
+        .then(function(){ mountPanel(ls.section_id); })
         .catch(function(e){ if(e && e.message==='Неверный slug') return; alert('Ошибка: '+e.message); });
     });
 
