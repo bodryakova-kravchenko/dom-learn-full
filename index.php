@@ -107,13 +107,25 @@ if (count($parts) >= 1 && preg_match('~^(\d+)-([a-z-]+)$~', $parts[0], $m1)) {
             ['href' => '', 'label' => 'Уровень-' . $levelNumber . '-' . $level['title_ru']],
         ]);
         echo '<main class="container">';
-        echo '<h1>' . e($level['title_ru']) . '</h1>';
+        echo '<h1>Уровень-' . $levelNumber . ' - ' . e($level['title_ru']) . '</h1>';
         echo '<div class="grid cards">';
         foreach ($sections as $sec) {
             $path = '/' . $parts[0] . '/' . ((int)$sec['section_order']) . '-' . e($sec['slug']);
             echo '<article class="card">';
-            echo '<h2><a href="' . $path . '">' . e($sec['title_ru']) . '</a></h2>';
-            echo '<p class="muted">Раздел ' . (int)$sec['section_order'] . '</p>';
+            echo '<h2><a href="' . $path . '">Раздел-' . (int)$sec['section_order'] . ' - ' . e($sec['title_ru']) . '</a></h2>';
+            // Список уроков в карточке раздела
+            $lessons = db_get_lessons_by_section_id((int)$sec['id']);
+            if (!empty($lessons)) {
+                echo '<div class="lesson-list">';
+                foreach ($lessons as $lsn) {
+                    if (!(int)$lsn['is_published']) continue; // скрываем непубликованные
+                    $lessonPath = $path . '/' . ((int)$lsn['lesson_order']) . '-' . e($lsn['slug']);
+                    echo '<div class="lesson-card">';
+                    echo '<a class="lesson-link" href="' . $lessonPath . '">Урок-' . (int)$lsn['lesson_order'] . ' - ' . e($lsn['title_ru']) . '</a>';
+                    echo '</div>';
+                }
+                echo '</div>';
+            }
             echo '</article>';
         }
         echo '</div>';
