@@ -145,17 +145,11 @@ if ($action !== '') {
         case 'section_delete':
             api_section_delete();
             exit;
-        case 'sections_reorder':
-            api_sections_reorder();
-            exit;
         case 'lesson_save':
             api_lesson_save();
             exit;
         case 'lesson_delete':
             api_lesson_delete();
-            exit;
-        case 'lessons_reorder':
-            api_lessons_reorder();
             exit;
         case 'ping_login':
             // Создаём сессию на сервере после валидации
@@ -305,20 +299,7 @@ function admin_js_bundle(): string {
   'use strict';
 
   var LS_REMEMBER = 'domlearn-remember';
-  var __dndCssInjected = false;
-
-  function injectDndStyles(){
-    if (__dndCssInjected) return; __dndCssInjected = true;
-    var st = document.createElement('style');
-    st.textContent = '\n'
-      + '.admin-right .list .item, .admin-left .list .item{ cursor: grab; user-select: none; }\n'
-      + '.admin-right .list .item.dragging, .admin-left .list .item.dragging{ opacity: .6; cursor: grabbing; }\n'
-      + '.list .item.dragging a{ pointer-events: none; }\n'
-      + '.admin-right .list .item.drag-over, .admin-left .list .item.drag-over{ outline: 2px dashed #4a90e2; outline-offset: 2px; }\n'
-      + '.dnd-hint{ font-size: 12px; color: #666; margin: 6px 0 10px; }\n'
-      + '.drop-indicator{ height: 6px; background: #4a90e2; border-radius: 3px; margin: 4px 0; box-shadow: 0 0 0 1px rgba(0,0,0,.05) inset; }\n';
-    document.head.appendChild(st);
-  }
+  
 
   function h(tag, attrs){
     var el = document.createElement(tag);
@@ -436,14 +417,10 @@ function admin_js_bundle(): string {
           .catch(function(e){ alert('Ошибка: '+e.message); });
       });
       sectionsWrap.appendChild(addBtn);
-      // Визуальная подсказка по DnD
-      injectDndStyles();
-      var hintSec = el('div','dnd-hint','Подсказка: перетаскивайте разделы мышкой, чтобы изменить порядок.');
-      sectionsWrap.appendChild(hintSec);
 
       var ul = el('ul','list'); ul.setAttribute('data-level', lv.id);
       (lv.sections||[]).forEach(function(sec){
-        var li = el('li','item'); li.draggable = true; li.dataset.id = sec.id;
+        var li = el('li','item'); li.dataset.id = sec.id;
         var a = el('a',null, sec.section_order+'. '+sec.title_ru);
         a.href='#'; a.addEventListener('click', function(ev){ ev.preventDefault(); currentSectionId=sec.id; renderLessons(sec); });
         var edit = el('button','sm','✎'); edit.title='Редактировать';
@@ -466,33 +443,6 @@ function admin_js_bundle(): string {
         li.appendChild(a); li.appendChild(edit); li.appendChild(del); ul.appendChild(li);
       });
 
-      // Drag & Drop (sections)
-      var dragId = null; var dragEl = null; var isDraggingSec=false; var indicatorSec = document.createElement('div'); indicatorSec.className='drop-indicator'; indicatorSec.style.display='none';
-      ul.addEventListener('dragstart', function(e){ var t=e.target.closest('li.item'); if(!t) return; dragId=t.dataset.id; dragEl=t; isDraggingSec=true; t.classList.add('dragging'); if(e.dataTransfer){ e.dataTransfer.effectAllowed='move'; e.dataTransfer.dropEffect='move'; e.dataTransfer.setData('text/plain', dragId); }});
-      ul.addEventListener('dragend', function(){ if(dragEl) dragEl.classList.remove('dragging'); dragId=null; dragEl=null; isDraggingSec=false; if(indicatorSec.parentNode) indicatorSec.parentNode.removeChild(indicatorSec); indicatorSec.style.display='none'; Array.prototype.forEach.call(ul.querySelectorAll('.drag-over'), function(x){ x.classList.remove('drag-over'); }); });
-      function updateIndicatorSec(e){
-        var t = e.target.closest('li.item');
-        if(!t || !dragEl || t===dragEl) return;
-        var r = t.getBoundingClientRect();
-        var before = (e.clientY - r.top) < (r.height/2);
-        indicatorSec.style.display='block';
-        if(before){ ul.insertBefore(indicatorSec, t); }
-        else { ul.insertBefore(indicatorSec, t.nextSibling); }
-      }
-      ul.addEventListener('dragover', function(e){ e.preventDefault(); if(e.dataTransfer) e.dataTransfer.dropEffect='move'; if(!e.target.closest('li.item') && ul.children.length>0){ ul.appendChild(indicatorSec); indicatorSec.style.display='block'; } else { updateIndicatorSec(e); } });
-      ul.addEventListener('dragleave', function(e){ var rel = e.relatedTarget; if(!ul.contains(rel)){ if(indicatorSec.parentNode) indicatorSec.parentNode.removeChild(indicatorSec); indicatorSec.style.display='none'; } });
-      ul.addEventListener('drop', function(e){ e.preventDefault(); if(!dragEl) return; if(indicatorSec.parentNode===ul){ ul.insertBefore(dragEl, indicatorSec.nextSibling); if(indicatorSec.parentNode) indicatorSec.parentNode.removeChild(indicatorSec); indicatorSec.style.display='none'; } saveReorderSections(); });
-      // Предотвращаем «клик» по ссылке при завершении перетаскивания
-      ul.addEventListener('click', function(e){ if(isDraggingSec){ e.preventDefault(); e.stopPropagation(); isDraggingSec=false; } });
-
-      function saveReorderSections(){
-        var ids = Array.from(ul.querySelectorAll('li.item')).map(function(li){ return parseInt(li.dataset.id,10); });
-        api('/crud.php?action=sections_reorder', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ level_id: lv.id, ids: ids })})
-          .then(function(){ return api('/crud.php?action=tree'); })
-          .then(function(d){ data=d; levels=d.levels||[]; renderSections(); if(currentSectionId){ var s=findSection(currentSectionId); if(s) renderLessons(s); }} )
-          .catch(function(e){ alert('Ошибка: '+e.message); });
-      }
-
       sectionsWrap.appendChild(ul);
     }
 
@@ -507,14 +457,10 @@ function admin_js_bundle(): string {
       var addBtn = el('button','btn','➕ Добавить урок');
       addBtn.addEventListener('click', function(){ openLessonEditor({section_id: sec.id, title_ru:'', slug:'', lesson_order: null, is_published:false, content:{tests:[],tasks:[],theory_html:''}}, true); });
       lessonsWrap.appendChild(addBtn);
-      // Визуальная подсказка по DnD
-      injectDndStyles();
-      var hintLs = el('div','dnd-hint','Подсказка: перетаскивайте уроки мышкой, чтобы изменить порядок внутри раздела.');
-      lessonsWrap.appendChild(hintLs);
 
       var ul = el('ul','list'); ul.setAttribute('data-section', sec.id);
       (sec.lessons||[]).forEach(function(ls){
-        var li = el('li','item'); li.draggable=true; li.dataset.id = ls.id;
+        var li = el('li','item'); li.dataset.id = ls.id;
         var pub = ls.is_published? '🟢' : '⚪';
         var a = el('a',null, pub+' '+ls.lesson_order+'. '+ls.title_ru);
         a.href='#'; a.addEventListener('click', function(ev){ ev.preventDefault(); openLessonEditor(ls,false); });
@@ -522,33 +468,6 @@ function admin_js_bundle(): string {
         del.addEventListener('click', function(){ if(!confirm('Удалить урок и его файлы?')) return; api('/crud.php?action=lesson_delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:ls.id})}).then(function(){ return api('/crud.php?action=tree'); }).then(function(d){ data=d; var s=findSection(sec.id); if(s) renderLessons(s); }).catch(function(e){ alert('Ошибка: '+e.message); }); });
         li.appendChild(a); li.appendChild(del); ul.appendChild(li);
       });
-
-      // Drag & Drop (lessons) с видимым ориентиром
-      var dragId = null; var dragEl = null; var isDragging=false; var indicator = document.createElement('div'); indicator.className='drop-indicator'; indicator.style.display='none';
-      ul.addEventListener('dragstart', function(e){ var t=e.target.closest('li.item'); if(!t) return; dragId=t.dataset.id; dragEl=t; isDragging=true; t.classList.add('dragging'); if(e.dataTransfer){ e.dataTransfer.effectAllowed='move'; e.dataTransfer.dropEffect='move'; e.dataTransfer.setData('text/plain', dragId); }});
-      ul.addEventListener('dragend', function(){ if(dragEl) dragEl.classList.remove('dragging'); dragId=null; dragEl=null; isDragging=false; if(indicator.parentNode) indicator.parentNode.removeChild(indicator); indicator.style.display='none'; Array.prototype.forEach.call(ul.querySelectorAll('.drag-over'), function(x){ x.classList.remove('drag-over'); }); });
-      function updateIndicator(e){
-        var t = e.target.closest('li.item');
-        if(!t || !dragEl || t===dragEl) return;
-        var r = t.getBoundingClientRect();
-        var before = (e.clientY - r.top) < (r.height/2);
-        indicator.style.display='block';
-        if(before){ ul.insertBefore(indicator, t); }
-        else { ul.insertBefore(indicator, t.nextSibling); }
-      }
-      ul.addEventListener('dragover', function(e){ e.preventDefault(); if(e.dataTransfer) e.dataTransfer.dropEffect='move'; if(!e.target.closest('li.item') && ul.children.length>0){ ul.appendChild(indicator); indicator.style.display='block'; } else { updateIndicator(e); } });
-      ul.addEventListener('dragleave', function(e){ var rel = e.relatedTarget; if(!ul.contains(rel)){ if(indicator.parentNode) indicator.parentNode.removeChild(indicator); indicator.style.display='none'; } });
-      ul.addEventListener('drop', function(e){ e.preventDefault(); if(!dragEl) return; if(indicator.parentNode===ul){ ul.insertBefore(dragEl, indicator.nextSibling); if(indicator.parentNode) indicator.parentNode.removeChild(indicator); indicator.style.display='none'; } saveReorderLessons(); });
-      // Предотвращаем «клик» по ссылке при завершении перетаскивания
-      ul.addEventListener('click', function(e){ if(isDragging){ e.preventDefault(); e.stopPropagation(); isDragging=false; } });
-
-      function saveReorderLessons(){
-        var ids = Array.from(ul.querySelectorAll('li.item')).map(function(li){ return parseInt(li.dataset.id,10); });
-        api('/crud.php?action=lessons_reorder',{method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({ section_id: sec.id, ids: ids })})
-          .then(function(){ return api('/crud.php?action=tree'); })
-          .then(function(d){ data=d; var s=findSection(sec.id); if(s) renderLessons(s); })
-          .catch(function(e){ alert('Ошибка: '+e.message); });
-      }
 
       lessonsWrap.appendChild(ul);
     }
@@ -1075,41 +994,6 @@ function api_section_delete(): void {
     json_response(['ok'=>true]);
 }
 
-function api_sections_reorder(): void {
-    if (!is_admin_authenticated()) { http_response_code(401); json_response(['error'=>'Unauthorized']); return; }
-    if (strtoupper($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') { http_response_code(405); json_response(['error'=>'method']); return; }
-    $data = json_decode(file_get_contents('php://input'), true) ?: [];
-    $level_id = (int)($data['level_id'] ?? 0);
-    $ids = $data['ids'] ?? [];
-    if ($level_id<=0 || !is_array($ids) || empty($ids)) { http_response_code(400); json_response(['error'=>'params']); return; }
-    $pdo = db();
-    $pdo->beginTransaction();
-    try{
-        // Фаза 1: временно сдвигаем за пределы, чтобы избежать конфликтов уникальности
-        $place = implode(',', array_fill(0, count($ids), '?'));
-        $tmpSql = 'UPDATE sections SET section_order = section_order + 1000 WHERE level_id = ? AND id IN (' . $place . ')';
-        $tmpStmt = $pdo->prepare($tmpSql);
-        $tmpStmt->execute(array_merge([$level_id], array_map('intval', $ids)));
-
-        // Фаза 2: проставляем целевые порядки через CASE
-        $case = [];
-        $params = [];
-        $ord = 1;
-        foreach ($ids as $id) {
-            $id = (int)$id;
-            $case[] = 'WHEN id = ? THEN ?';
-            $params[] = $id; // для id в WHEN
-            $params[] = $ord++; // для значения section_order
-        }
-        $sql = 'UPDATE sections SET section_order = CASE ' . implode(' ', $case) . ' ELSE section_order END WHERE level_id = ? AND id IN (' . $place . ')';
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(array_merge($params, [$level_id], array_map('intval', $ids)));
-
-        $pdo->commit();
-        json_response(['ok'=>true]);
-    }catch(Throwable $e){ $pdo->rollBack(); http_response_code(500); json_response(['error'=>$e->getMessage()]); }
-}
-
 // ================== LESSONS: save/delete/reorder ==================
 function api_lesson_save(): void {
     if (!is_admin_authenticated()) { http_response_code(401); json_response(['error'=>'Unauthorized']); return; }
@@ -1155,39 +1039,4 @@ function api_lesson_delete(): void {
     rrmdir(__DIR__ . '/images/lesson_' . $id);
     $st = db()->prepare('DELETE FROM lessons WHERE id=?'); $st->execute([$id]);
     json_response(['ok'=>true]);
-}
-
-function api_lessons_reorder(): void {
-    if (!is_admin_authenticated()) { http_response_code(401); json_response(['error'=>'Unauthorized']); return; }
-    if (strtoupper($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') { http_response_code(405); json_response(['error'=>'method']); return; }
-    $data = json_decode(file_get_contents('php://input'), true) ?: [];
-    $section_id = (int)($data['section_id'] ?? 0);
-    $ids = $data['ids'] ?? [];
-    if ($section_id<=0 || !is_array($ids) || empty($ids)) { http_response_code(400); json_response(['error'=>'params']); return; }
-    $pdo = db();
-    $pdo->beginTransaction();
-    try{
-        // Фаза 1: временный сдвиг, чтобы не было конфликтов уникальных ключей
-        $place = implode(',', array_fill(0, count($ids), '?'));
-        $tmpSql = 'UPDATE lessons SET lesson_order = lesson_order + 1000 WHERE section_id = ? AND id IN (' . $place . ')';
-        $tmpStmt = $pdo->prepare($tmpSql);
-        $tmpStmt->execute(array_merge([$section_id], array_map('intval', $ids)));
-
-        // Фаза 2: финальный порядок через CASE
-        $case = [];
-        $params = [];
-        $ord = 1;
-        foreach ($ids as $id) {
-            $id = (int)$id;
-            $case[] = 'WHEN id = ? THEN ?';
-            $params[] = $id; // id
-            $params[] = $ord++; // новый lesson_order
-        }
-        $sql = 'UPDATE lessons SET lesson_order = CASE ' . implode(' ', $case) . ' ELSE lesson_order END WHERE section_id = ? AND id IN (' . $place . ')';
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(array_merge($params, [$section_id], array_map('intval', $ids)));
-
-        $pdo->commit();
-        json_response(['ok'=>true]);
-    }catch(Throwable $e){ $pdo->rollBack(); http_response_code(500); json_response(['error'=>$e->getMessage()]); }
 }
